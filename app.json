@@ -42,6 +42,16 @@
             "newArchEnabled": true
           }
         }
+      ],
+      [
+        "expo-font",
+        {
+          "fonts": [
+            "/node_modules/@expo-google-fonts/montserrat/Montserrat_900Black.ttf",
+            "node_modules/@expo-google-fonts/inter/Inter_900Black.ttf",
+            "/node_modules/@expo-google-fonts/modak/Modak_400Regular.ttf"
+          ]
+        }
       ]
     ]
   }
