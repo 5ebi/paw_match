@@ -12,10 +12,10 @@ import {
 } from '@expo-google-fonts/montserrat';
 import { useFonts } from 'expo-font';
 import { StatusBar } from 'expo-status-bar';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { FlatList, SafeAreaView, StyleSheet, Text, View } from 'react-native';
-import UserItem from './components/UserItem';
-import { colors } from './constants/colors';
+import UserItem from '../components/UserItem';
+import { colors } from '../constants/colors';
 
 const App = () => {
   const [fontsLoaded] = useFonts({
@@ -62,20 +62,33 @@ const App = () => {
 
   type User = {
     id: number;
-    firstName: string;
-    lastName: string;
+    name: {
+      first: string;
+      last: string;
+    };
   };
 
-  const [users, setUsers] = useState([
-    { id: 1, firstName: 'Sebi', lastName: 'Speiser' },
-    { id: 2, firstName: 'Jasmin', lastName: 'Speiser' },
-    { id: 3, firstName: 'Monti', lastName: 'Speiser' },
-    { id: 4, firstName: 'Mila', lastName: 'Speiser' },
-  ]);
+  const [users, setUsers] = useState<User[]>([]);
 
-  const renderItem = ({ item }: { item: User }) => <UserItem user={item} />;
+  useEffect(() => {
+    async function getUsers() {
+      const response = await fetch('https://randomuser.me/api', {
+        method: 'GET',
+        headers: {
+          Cookies: 'name=value',
+        },
+      });
+      const data = await response.json();
+      setUsers(data.results);
+    }
+
+    getUsers().catch((error) => console.error(error));
+  }, []);
+
+  const renderItem = (item: { item: User }) => <UserItem user={item.item} />;
+
   if (!fontsLoaded) {
-    return <Text>Loading...</Text>;
+    return null;
   }
   return (
     <SafeAreaView style={styles.container}>
@@ -93,7 +106,7 @@ const App = () => {
         renderItem={renderItem}
         keyExtractor={(item: User) => String(item.id)}
       />
-      <StatusBar style="auto" hidden={false} />
+      <StatusBar style="dark" hidden={false} />
     </SafeAreaView>
   );
 };
