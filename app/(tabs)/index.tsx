@@ -14,8 +14,8 @@ import { useFonts } from 'expo-font';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
 import { FlatList, SafeAreaView, StyleSheet, Text, View } from 'react-native';
-import UserItem from '../components/UserItem';
-import { colors } from '../constants/colors';
+import UserItem from '../../components/UserItem';
+import { colors } from '../../constants/colors';
 
 const App = () => {
   const [fontsLoaded] = useFonts({
@@ -35,8 +35,8 @@ const App = () => {
     container: {
       flex: 1,
       backgroundColor: colors.background,
-      alignItems: 'center',
-      justifyContent: 'center',
+      // alignItems: 'center',
+      // justifyContent: 'center',
     },
     h2: {
       color: colors.h2,
@@ -101,11 +101,11 @@ const App = () => {
         </Text>
       </View>
 
-      <FlatList
+      {/* <FlatList
         data={users}
         renderItem={renderItem}
         keyExtractor={(item: User) => String(item.id)}
-      />
+      /> */}
       <StatusBar style="dark" hidden={false} />
     </SafeAreaView>
   );

@@ -7,10 +7,12 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 16,
     fontFamily: 'Montserrat_600SemiBold',
-    alignContent: 'center',
-    color: colors.blackBean,
-    fontWeight: 500,
+
+    justifyContent: 'center',
+    color: colors.black2,
+    fontWeight: '500',
     marginBottom: 10,
+    textAlignVertical: 'center',
   },
 
   card: {
@@ -18,8 +20,9 @@ const styles = StyleSheet.create({
     paddingTop: 10,
     paddingBottom: 10,
     borderRadius: 30,
-    marginBottom: 40,
+    height: 50,
     width: 300,
+    justifyContent: 'center',
   },
 });
 
