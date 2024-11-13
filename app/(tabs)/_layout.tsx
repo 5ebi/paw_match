@@ -7,7 +7,6 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: colors.text,
-
         tabBarInactiveTintColor: colors.textSecondary,
         headerShown: false,
         tabBarStyle: {
@@ -20,21 +19,19 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Guest List',
+          title: 'Home',
           tabBarIcon: ({ color, focused }) =>
-            TabBarIcon({ name: focused ? 'list' : 'list-outline', color }),
-          unmountOnBlur: true,
+            TabBarIcon({ name: focused ? 'home' : 'home-outline', color }),
         }}
       />
       <Tabs.Screen
         name="newGuest"
         options={{
-          title: 'Add Guest',
+          title: '',
           tabBarIcon: ({ color, focused }) =>
             TabBarIcon({ name: focused ? 'add' : 'add-outline', color }),
         }}
       />
-
       <Tabs.Screen
         name="testboy"
         options={{
@@ -49,16 +46,9 @@ export default function TabLayout() {
       <Tabs.Screen
         name="profile"
         options={{
-          title: 'Profile',
+          title: '',
           tabBarIcon: ({ color, focused }) =>
             TabBarIcon({ name: focused ? 'person' : 'person-outline', color }),
-        }}
-      />
-      <Tabs.Screen
-        name="settings"
-        options={{
-          title: 'Settings',
-          tabBarButton: () => null, // Verhindert, dass es in der Tabbar angezeigt wird
         }}
       />
     </Tabs>

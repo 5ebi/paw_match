@@ -12,9 +12,9 @@ import {
 } from '@expo-google-fonts/montserrat';
 import { useFonts } from 'expo-font';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect, useState } from 'react';
-import { FlatList, SafeAreaView, StyleSheet, Text, View } from 'react-native';
-import UserItem from '../../components/UserItem';
+// import { useEffect, useState } from 'react';
+import { SafeAreaView, StyleSheet, Text, View } from 'react-native';
+// import UserItem from '../../components/UserItem';
 import { colors } from '../../constants/colors';
 
 const App = () => {
@@ -60,32 +60,32 @@ const App = () => {
     },
   });
 
-  type User = {
-    id: number;
-    name: {
-      first: string;
-      last: string;
-    };
-  };
+  // type User = {
+  //   id: number;
+  //   name: {
+  //     first: string;
+  //     last: string;
+  //   };
+  // };
 
-  const [users, setUsers] = useState<User[]>([]);
+  // const [users, setUsers] = useState<User[]>([]);
 
-  useEffect(() => {
-    async function getUsers() {
-      const response = await fetch('https://randomuser.me/api', {
-        method: 'GET',
-        headers: {
-          Cookies: 'name=value',
-        },
-      });
-      const data = await response.json();
-      setUsers(data.results);
-    }
+  // useEffect(() => {
+  //   async function getUsers() {
+  //     const response = await fetch('https://randomuser.me/api', {
+  //       method: 'GET',
+  //       headers: {
+  //         Cookies: 'name=value',
+  //       },
+  //     });
+  //     const data = await response.json();
+  //     setUsers(data.results);
+  //   }
 
-    getUsers().catch((error) => console.error(error));
-  }, []);
+  //   getUsers().catch((error) => console.error(error));
+  // }, []);
 
-  const renderItem = (item: { item: User }) => <UserItem user={item.item} />;
+  // const renderItem = (item: { item: User }) => <UserItem user={item.item} />;
 
   if (!fontsLoaded) {
     return null;
@@ -100,8 +100,8 @@ const App = () => {
           Find the Pawfect Match!
         </Text>
       </View>
-
-      {/* <FlatList
+      {/*
+      <FlatList
         data={users}
         renderItem={renderItem}
         keyExtractor={(item: User) => String(item.id)}

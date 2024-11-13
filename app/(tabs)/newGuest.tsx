@@ -65,6 +65,10 @@ const styles = StyleSheet.create({
   },
 });
 
+type GuestResponse = {
+  error?: string;
+};
+
 export default function NewGuest() {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -101,14 +105,15 @@ export default function NewGuest() {
         onPress={async () => {
           const response = await fetch('/api/guests', {
             method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ firstName, lastName, attending: false }),
           });
 
           if (!response.ok) {
             let errorMessage = 'Error creating guest';
-            const body = await response.json();
+            const body: GuestResponse = await response.json();
 
-            if ('error' in body) {
+            if (body.error) {
               errorMessage = body.error;
             }
 
@@ -118,7 +123,7 @@ export default function NewGuest() {
 
           setFirstName('');
           setLastName('');
-          router.push('/');
+          router.push('../');
         }}
       >
         <Text style={styles.text}>Add Guest</Text>

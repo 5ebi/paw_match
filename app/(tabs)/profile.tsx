@@ -1,6 +1,5 @@
 import { router } from 'expo-router';
 import * as React from 'react';
-import { Text } from 'react-native';
 import { Button } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import H1 from '../../components/H1';
@@ -16,7 +15,7 @@ export default function Profile() {
       <Button
         mode="elevated"
         compact={true}
-        onPress={() => router.push('/(tabs)/settings')}
+        onPress={() => router.push('/settings')}
         onLongPress={() => setIsLongPressed(true)} // Background changes on long press
         onPressOut={() => setIsLongPressed(false)} // Reset when button is released
         style={{
@@ -25,7 +24,21 @@ export default function Profile() {
           backgroundColor: isLongPressed ? colors.black : 'white', // Dynamic background color
         }}
       >
-        Press me to change your settings
+        Change your settings
+      </Button>
+
+      <Button
+        mode="elevated"
+        compact={true}
+        onPress={() => router.push('/welcome')}
+        buttonColor="red"
+        textColor={colors.black}
+        style={{
+          alignSelf: 'center',
+          marginTop: 10,
+        }}
+      >
+        LOG OUT
       </Button>
     </SafeAreaView>
   );
