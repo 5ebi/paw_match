@@ -1,4 +1,7 @@
-import { Montserrat_600SemiBold } from '@expo-google-fonts/montserrat';
+import {
+  Montserrat_600SemiBold,
+  useFonts,
+} from '@expo-google-fonts/montserrat';
 import { StyleSheet, Text, View } from 'react-native';
 import { colors } from '../constants/colors';
 
@@ -37,6 +40,13 @@ type Props = {
 export default function UserItem({ user }: Props) {
   const { first, last } = user.name;
 
+  const [fontsLoaded] = useFonts({
+    Montserrat_600SemiBold,
+  });
+
+  if (!fontsLoaded) {
+    return null;
+  }
   return (
     <View style={styles.card}>
       <Text style={styles.text}>

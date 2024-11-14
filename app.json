@@ -52,9 +52,20 @@
         {
           "fonts": [
             "/node_modules/@expo-google-fonts/montserrat/Montserrat_900Black.ttf",
-            "node_modules/@expo-google-fonts/inter/Inter_900Black.ttf",
             "/node_modules/@expo-google-fonts/modak/Modak_400Regular.ttf"
           ]
+        }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#232323",
+          "image": "./assets/logo-splash.png",
+          "dark": {
+            "image": "./assets/logo-splash-white.png",
+            "backgroundColor": "#1F1F1F"
+          },
+          "imageWidth": 200
         }
       ]
     ]

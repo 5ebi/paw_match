@@ -13,6 +13,7 @@ import {
 import Constants from 'expo-constants';
 import { useFonts } from 'expo-font';
 import { Stack, useRouter } from 'expo-router';
+import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
 import { Platform, SafeAreaView, StyleSheet, View } from 'react-native';
@@ -34,7 +35,8 @@ const styles = StyleSheet.create({
 
 export default function HomeLayout() {
   const router = useRouter();
-  const [isRedirecting, setIsRedirecting] = useState<boolean>(false); // State to manage navigation
+  const [isReady, setIsReady] = useState(false); // State to manage readiness
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // Replace with real login logic
 
   const [fontsLoaded] = useFonts({
     Montserrat_100Thin,
@@ -49,15 +51,63 @@ export default function HomeLayout() {
     Modak_400Regular,
   });
 
+  // Prevent the splash screen from hiding automatically
   useEffect(() => {
-    if (fontsLoaded && !isRedirecting) {
-      setIsRedirecting(true); // Avoid multiple redirects
-      router.replace('/(auth)/welcome');
+    async function setupSplashScreen() {
+      try {
+        await SplashScreen.preventAutoHideAsync();
+      } catch (error) {
+        console.warn('Error preventing splash screen auto-hide:', error);
+      }
     }
-  }, [fontsLoaded, isRedirecting, router]);
 
-  if (!fontsLoaded) {
-    return null;
+    setupSplashScreen().catch((error) => {
+      console.error('Unhandled error in setupSplashScreen:', error);
+    });
+  }, []);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        // Simulate checking login state
+        await new Promise<void>((resolve) => {
+          setTimeout(() => resolve(), 1000); // Correctly handle the timeout
+        });
+
+        setIsLoggedIn(false); // Replace with actual login logic
+
+        if (fontsLoaded) {
+          setIsReady(true);
+        }
+      } catch (error) {
+        console.warn('Error during preparation:', error);
+      }
+    })().catch((error) => {
+      console.error('Unhandled promise in preparation:', error);
+    });
+  }, [fontsLoaded]);
+
+  useEffect(() => {
+    (async () => {
+      if (isReady) {
+        try {
+          await SplashScreen.hideAsync();
+          if (isLoggedIn) {
+            await router.replace('/(tabs)'); // Redirect to logged-in screen
+          } else {
+            await router.replace('/(auth)/welcome'); // Redirect to welcome screen
+          }
+        } catch (error) {
+          console.warn('Error during splash screen or routing:', error);
+        }
+      }
+    })().catch((error) => {
+      console.error('Unhandled promise in splash screen routing:', error);
+    });
+  }, [isReady, isLoggedIn, router]);
+
+  if (!isReady) {
+    return null; // Return nothing while splash screen is visible
   }
 
   return (

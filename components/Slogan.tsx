@@ -1,31 +1,30 @@
-import { Montserrat_900Black, useFonts } from '@expo-google-fonts/montserrat';
+import { Modak_400Regular, useFonts } from '@expo-google-fonts/modak';
 import React from 'react';
 import { StyleSheet, Text } from 'react-native';
 import { colors } from '../constants/colors';
 
 const styles = StyleSheet.create({
-  h1: {
-    fontSize: 32,
-    fontWeight: 'bold',
+  Slogan: {
+    fontSize: 24,
+
     color: colors.black2,
-    marginBottom: 20,
-    marginTop: 20,
+
     textAlign: 'center', // Centers the text
-    fontFamily: 'Montserrat_900Black',
+    fontFamily: 'Modak_400Regular',
   },
 });
 
-type H1Props = {
+type LogoProps = {
   children: React.ReactNode; // The content to be displayed
 };
 
-export default function H1({ children }: H1Props) {
+export default function Slogan({ children }: LogoProps) {
   const [fontsLoaded] = useFonts({
-    Montserrat_900Black,
+    Modak_400Regular,
   });
 
   if (!fontsLoaded) {
     return null;
   }
-  return <Text style={[styles.h1]}>{children}</Text>;
+  return <Text style={[styles.Slogan]}>{children}</Text>;
 }

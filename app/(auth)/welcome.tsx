@@ -1,62 +1,57 @@
 import { router } from 'expo-router';
 import React from 'react';
-import { SafeAreaView, StyleSheet, Text } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { Button } from 'react-native-paper';
+import FullPageContainer from '../../components/FullPageContainer';
 import Logo from '../../components/Logo';
+import Slogan from '../../components/Slogan';
 import { colors } from '../../constants/colors';
 
 export default function Welcome() {
   const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: colors.background,
-      // alignItems: 'center',
-      // justifyContent: 'center',
+    logoContainer: {
+      flex: 1, // Takes up available vertical space
+      justifyContent: 'center',
+      alignItems: 'center',
     },
-    h2: {
-      color: colors.h2,
-      fontFamily: 'Montserrat_700Bold',
-      fontWeight: 700,
-      margin: 10,
-      fontSize: 20,
-      paddingLeft: 20,
-      paddingRight: 20,
-      letterSpacing: 2,
-      lineHeight: 80,
-      textAlign: 'center',
+    buttonsContainer: {
+      paddingBottom: 20, // Adds some spacing from the bottom
     },
-    h1: {
-      color: colors.h1,
-      fontFamily: 'Modak_400Regular',
-      fontSize: 60,
-      letterSpacing: 1,
-      textAlign: 'center',
-      marginVertical: 35,
+    button: {
+      alignSelf: 'center',
+      width: 332,
+      marginBottom: 10,
     },
   });
 
   return (
-    <SafeAreaView style={styles.container}>
-      <Logo>Paw Match</Logo>
-      <Text>Hello and welcome to Dog Match!</Text>
+    <FullPageContainer>
+      {/* Content at the top or center */}
+      <View style={styles.logoContainer}>
+        <Logo>Paw Match</Logo>
+        <Slogan>find the pawfect match</Slogan>
+      </View>
 
-      <Button
-        style={{ alignSelf: 'center', width: 332, marginBottom: 10 }}
-        textColor={colors.text}
-        mode="outlined"
-        onPress={() => router.push('/(auth)/register')}
-      >
-        Sign Up
-      </Button>
+      {/* Buttons at the bottom */}
+      <View style={styles.buttonsContainer}>
+        <Button
+          style={styles.button}
+          textColor={colors.text}
+          mode="outlined"
+          onPress={() => router.push('/(auth)/register')}
+        >
+          Sign Up
+        </Button>
 
-      <Button
-        style={{ alignSelf: 'center', width: 332, marginBottom: 10 }}
-        mode="contained"
-        onPress={() => router.push('/(auth)/login')}
-      >
-        I already have an account
-      </Button>
-    </SafeAreaView>
+        <Button
+          style={styles.button}
+          mode="contained"
+          onPress={() => router.push('/(auth)/login')}
+        >
+          I already have an account
+        </Button>
+      </View>
+    </FullPageContainer>
   );
 }
 

@@ -5,10 +5,9 @@ import { colors } from '../constants/colors';
 
 const styles = StyleSheet.create({
   Logo: {
-    fontSize: 56,
-
+    fontSize: 60,
     color: colors.black2,
-    marginBottom: 20,
+
     textAlign: 'center', // Centers the text
     fontFamily: 'Modak_400Regular',
   },
