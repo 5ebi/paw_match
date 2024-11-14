@@ -13,6 +13,8 @@ export default function TabLayout() {
           backgroundColor: colors.background,
           borderTopColor: colors.white,
           borderTopWidth: 1,
+          height: 50,
+          paddingBottom: 0,
         },
       }}
     >
@@ -35,7 +37,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="testboy"
         options={{
-          title: 'TEST',
+          title: '',
           tabBarIcon: ({ color, focused }) =>
             TabBarIcon({
               name: focused ? 'warning' : 'warning-outline',

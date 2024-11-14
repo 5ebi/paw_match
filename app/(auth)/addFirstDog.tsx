@@ -10,7 +10,7 @@ export default function AddFirstDog() {
     <FullPageContainer>
       <H1>Add your Dog</H1>
 
-      <Link href="/(tabs)" asChild>
+      <Link href="/jumpingdog" asChild>
         <Button
           style={{ alignSelf: 'center', width: 332, marginBottom: 10 }}
           textColor={colors.text}

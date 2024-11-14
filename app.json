@@ -2,7 +2,7 @@
   "expo": {
     "name": "finalproject-fall-2024-atvie",
     "slug": "finalproject-fall-2024-atvie",
-    "newArchEnabled": true,
+    "newArchEnabled": false,
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -13,15 +13,16 @@
       "backgroundColor": "#ffffff"
     },
     "scheme": "finalproject-fall-2024-atvie",
-
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.x5eba5tian.finalprojectfall2024atvie"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.x5eba5tian.finalprojectfall2024atvie"
     },
     "web": {
       "favicon": "./assets/favicon.png",
@@ -40,20 +41,17 @@
         "expo-build-properties",
         {
           "ios": {
-            "newArchEnabled": true
+            "newArchEnabled": false
           },
           "android": {
-            "newArchEnabled": true
+            "newArchEnabled": false
           }
         }
       ],
       [
         "expo-font",
         {
-          "fonts": [
-            "/node_modules/@expo-google-fonts/montserrat/Montserrat_900Black.ttf",
-            "/node_modules/@expo-google-fonts/modak/Modak_400Regular.ttf"
-          ]
+          "fonts": []
         }
       ],
       [
