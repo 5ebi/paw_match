@@ -2,7 +2,7 @@
   "expo": {
     "name": "finalproject-fall-2024-atvie",
     "slug": "finalproject-fall-2024-atvie",
-    "newArchEnabled": false,
+    "newArchEnabled": true,
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -41,10 +41,10 @@
         "expo-build-properties",
         {
           "ios": {
-            "newArchEnabled": false
+            "newArchEnabled": true
           },
           "android": {
-            "newArchEnabled": false
+            "newArchEnabled": true
           }
         }
       ],

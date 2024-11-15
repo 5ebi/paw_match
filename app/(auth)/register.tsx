@@ -1,11 +1,14 @@
 import { Link } from 'expo-router';
-import React from 'react';
-import { Button } from 'react-native-paper';
+import React, { useState } from 'react';
+import { Button, TextInput } from 'react-native-paper';
 import FullPageContainer from '../../components/FullPageContainer';
 import H1 from '../../components/H1';
 import { colors } from '../../constants/colors';
 
 export default function Register() {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+
   return (
     <FullPageContainer>
       <H1>Register</H1>
@@ -18,6 +21,16 @@ export default function Register() {
         >
           Sign Up
         </Button>
+        <TextInput
+          label="Name"
+          value={name}
+          onChangeText={(text) => setName(text)}
+        />
+        <TextInput
+          label="Email"
+          value={email}
+          onChangeText={(text) => setEmail(text)}
+        />
       </Link>
     </FullPageContainer>
   );
