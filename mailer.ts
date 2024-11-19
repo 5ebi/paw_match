@@ -1,8 +1,14 @@
+import 'dotenv/config';
 import nodemailer from 'nodemailer';
 import SMTPTransport from 'nodemailer/lib/smtp-transport';
 
+console.log('SMTP_HOST:', process.env.SMTP_HOST);
+console.log('SMTP_PORT:', process.env.SMTP_PORT);
+console.log('EMAIL_USER:', process.env.EMAIL_USER);
+console.log('EMAIL_PASS:', process.env.EMAIL_PASS ? 'Loaded' : 'Not Loaded');
+
 // Transporter für iCloud SMTP einrichten
-const transporter = nodemailer.createTransport<SMTPTransport.Options>({
+const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST, // iCloud SMTP server
   port: parseInt(process.env.SMTP_PORT || '587', 10), // Ensure the port is a number
   secure: false, // TLS
@@ -13,7 +19,7 @@ const transporter = nodemailer.createTransport<SMTPTransport.Options>({
   family: 4, // Enforce IPv4
   debug: true, // Enable debugging
   logger: true, // Log SMTP communication
-});
+} as SMTPTransport.Options);
 
 // E-Mail senden Funktion
 export const sendEmail = async (

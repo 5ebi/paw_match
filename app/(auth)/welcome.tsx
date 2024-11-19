@@ -10,7 +10,8 @@ import { colors } from '../../constants/colors';
 export default function Welcome() {
   const styles = StyleSheet.create({
     logoContainer: {
-      flex: 1, // Takes up available vertical space
+      // flex: 1, // Takes up available vertical space
+      marginTop: 30,
       justifyContent: 'center',
       alignItems: 'center',
     },
@@ -36,7 +37,6 @@ export default function Welcome() {
       <View style={styles.buttonsContainer}>
         <Button
           style={styles.button}
-          textColor={colors.text}
           mode="outlined"
           onPress={() => router.push('/(auth)/register')}
         >

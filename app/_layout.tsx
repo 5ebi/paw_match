@@ -15,9 +15,17 @@ import { useFonts } from 'expo-font';
 import { Stack, useRouter } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect, useState } from 'react';
-import { Platform, SafeAreaView, StyleSheet, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import {
+  Platform,
+  SafeAreaView,
+  StyleSheet,
+  useColorScheme,
+  View,
+} from 'react-native';
+import { PaperProvider } from 'react-native-paper';
 import { colors } from '../constants/colors';
+import { darkTheme, lightTheme } from '../constants/theme';
 
 const styles = StyleSheet.create({
   container: {
@@ -34,6 +42,8 @@ const styles = StyleSheet.create({
 });
 
 export default function HomeLayout() {
+  const colorScheme = useColorScheme(); // Returns 'light' or 'dark'
+
   const router = useRouter();
   const [isReady, setIsReady] = useState(false); // State to manage readiness
   const [isLoggedIn, setIsLoggedIn] = useState(false); // Replace with real login logic
@@ -111,15 +121,17 @@ export default function HomeLayout() {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar style="light" />
-      <View style={styles.view}>
-        <Stack>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-          <Stack.Screen name="(files)" options={{ headerShown: false }} />
-        </Stack>
-      </View>
-    </SafeAreaView>
+    <PaperProvider theme={colorScheme === 'dark' ? darkTheme : lightTheme}>
+      <SafeAreaView style={styles.container}>
+        <StatusBar style="light" />
+        <View style={styles.view}>
+          <Stack>
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+            <Stack.Screen name="(files)" options={{ headerShown: false }} />
+          </Stack>
+        </View>
+      </SafeAreaView>
+    </PaperProvider>
   );
 }
