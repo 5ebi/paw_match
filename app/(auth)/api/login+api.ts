@@ -1,71 +1,91 @@
-import { PrismaClient } from '@prisma/client';
+import crypto from 'node:crypto';
 import bcryptJs from 'bcryptjs';
 import { ExpoApiResponse } from '../../../ExpoApiResponse';
-
-const prisma = new PrismaClient();
+import { prisma } from '../../../prismaClient';
 
 interface LoginBody {
   email: string;
   password: string;
 }
 
-interface SuccessResponse {
-  message: string;
+interface LoginSuccess {
   user: {
     id: number;
-    name: string;
+    username: string;
   };
+  token: string;
 }
 
-interface ErrorResponse {
+interface LoginError {
   error: string;
+  needsVerification?: boolean;
 }
 
-type LoginResponse = SuccessResponse | ErrorResponse;
+type LoginResponse = LoginSuccess | LoginError;
 
 export async function POST(
   request: Request,
 ): Promise<ExpoApiResponse<LoginResponse>> {
-  console.log('API Route hit: /api/login');
+  try {
+    const body: LoginBody = await request.json();
 
-  const body: LoginBody = await request.json();
-
-  // Überprüfen, ob der Benutzer existiert
-  const existingUser = await prisma.owner.findUnique({
-    where: {
-      email: body.email.toLowerCase(),
-    },
-  });
-
-  if (!existingUser) {
-    return ExpoApiResponse.json(
-      { error: 'Invalid email or password' },
-      { status: 401 },
-    );
-  }
-
-  // Passwort überprüfen
-  const isPasswordValid = await bcryptJs.compare(
-    body.password,
-    existingUser.password,
-  );
-
-  if (!isPasswordValid) {
-    return ExpoApiResponse.json(
-      { error: 'Invalid email or password' },
-      { status: 401 },
-    );
-  }
-
-  // Erfolg: Benutzerdaten zurückgeben
-  return ExpoApiResponse.json(
-    {
-      message: 'Login successful',
-      user: {
-        id: existingUser.id,
-        name: existingUser.name,
+    const user = await prisma.owner.findUnique({
+      where: {
+        email: body.email.toLowerCase(),
       },
-    },
-    { status: 200 },
-  );
+    });
+
+    if (!user) {
+      return ExpoApiResponse.json(
+        { error: 'Invalid credentials' },
+        { status: 401 },
+      );
+    }
+
+    // Check if user is verified
+    if (!user.verified) {
+      return ExpoApiResponse.json(
+        {
+          error: 'Please verify your email address before logging in',
+          needsVerification: true,
+        },
+        { status: 403 },
+      );
+    }
+
+    // Check password
+    const validPassword = await bcryptJs.compare(body.password, user.password);
+    if (!validPassword) {
+      return ExpoApiResponse.json(
+        { error: 'Invalid credentials' },
+        { status: 401 },
+      );
+    }
+
+    // Generate session token
+    const token = crypto.randomBytes(32).toString('hex');
+
+    // Create session
+    await prisma.session.create({
+      data: {
+        token,
+        userId: user.id,
+        expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
+      },
+    });
+
+    return ExpoApiResponse.json(
+      {
+        user: {
+          id: user.id,
+          username: user.name,
+        },
+        token,
+      },
+      { status: 200 },
+    );
+  } catch (error) {
+    console.error('Login error:', error);
+    return ExpoApiResponse.json({ error: 'Login failed' }, { status: 500 });
+  }
 }

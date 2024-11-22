@@ -9,13 +9,13 @@ console.log('EMAIL_PASS:', process.env.EMAIL_PASS ? 'Loaded' : 'Not Loaded');
 
 // Transporter für Gmail SMTP einrichten
 const transporter = nodemailer.createTransport({
-  service: 'gmail', // Gmail-Service verwenden
+  service: 'gmail',
   auth: {
-    user: process.env.EMAIL_USER, // Deine Gmail-Adresse
-    pass: process.env.EMAIL_PASS, // Dein Gmail-App-Passwort
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
   },
-  debug: true, // Debug-Logs aktivieren
-  logger: true, // SMTP-Kommunikation protokollieren
+  debug: true,
+  logger: true,
 } as SMTPTransport.Options);
 
 // E-Mail senden Funktion
@@ -26,10 +26,10 @@ export const sendEmail = async (
 ): Promise<void> => {
   try {
     const info = await transporter.sendMail({
-      from: `"Paw Match" <${process.env.EMAIL_USER}>`, // Absendername und -adresse
-      to, // Empfängeradresse
-      subject, // Betreff
-      text, // Nachrichtentext
+      from: `"Paw Match" <${process.env.EMAIL_USER}>`,
+      to,
+      subject,
+      text,
     });
     console.log('Email sent: ', info.response);
   } catch (error: unknown) {
@@ -42,10 +42,11 @@ export const sendEmail = async (
   }
 };
 
-(async () => {
+// Test-Funktion
+const testEmail = async (): Promise<void> => {
   try {
     await sendEmail(
-      'test@example.com', // Ersetze durch deine eigene E-Mail-Adresse
+      'sebastian.hunkeler@gmx.at', // Ersetze dies mit deiner E-Mail-Adresse
       'Test Email',
       'This is a test email sent via Gmail SMTP!',
     );
@@ -53,4 +54,10 @@ export const sendEmail = async (
   } catch (error) {
     console.error('Failed to send test email:', error);
   }
-})();
+};
+
+// Führe den Test aus und handle Promise-Fehler korrekt
+void testEmail().catch((error) => {
+  console.error('Top-level error:', error);
+  process.exit(1);
+});

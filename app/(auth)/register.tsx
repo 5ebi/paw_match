@@ -14,13 +14,14 @@ export default function Register() {
   const [success, setSuccess] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter(); // Hook for navigation
+
   const handleSubmit = async () => {
     if (isSubmitting) return; // Prevent duplicate submissions
     setIsSubmitting(true);
     const userData = { email, password, name };
 
     try {
-      const response = await fetch('api/register', {
+      const response = await fetch('/api/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -78,7 +79,6 @@ export default function Register() {
         value={email}
         onChangeText={(text) => setEmail(text)}
         style={{ marginBottom: 10 }}
-        keyboardType="email-address"
       />
       <TextInput
         label="Password"

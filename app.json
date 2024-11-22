@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "finalproject-fall-2024-atvie",
-    "slug": "finalproject-fall-2024-atvie",
+    "name": "Paw Match",
+    "slug": "pawmatch",
     "newArchEnabled": true,
     "version": "1.0.0",
     "orientation": "portrait",
@@ -12,17 +12,17 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "scheme": "finalproject-fall-2024-atvie",
+    "scheme": "pawmatch",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.x5eba5tian.finalprojectfall2024atvie"
+      "bundleIdentifier": "xyz.pawmatch.app"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.x5eba5tian.finalprojectfall2024atvie"
+      "package": "xyz.pawmatch.app"
     },
     "web": {
       "favicon": "./assets/favicon.png",
