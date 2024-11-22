@@ -7,13 +7,25 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model owners {
-  id                Int       @id @default(autoincrement())
-  name              String    @db.VarChar(100)
-  email             String    @unique @db.VarChar(150)
-  password          String    @db.VarChar(255)
-  postal_code       String?   @db.VarChar(10)
-  created_at        DateTime? @default(now()) @db.Timestamp(6)
-  verified          Boolean?  @default(false)
-  verification_code String?   @db.VarChar(6)
+model Owner {
+  id               Int       @id @default(autoincrement())
+  name             String
+  email            String    @unique
+  password         String
+  postal_code      String?
+  verified         Boolean   @default(false)
+  createdAt        DateTime  @default(now())
+  verificationCode String?
+  sessions         Session[]
+}
+
+model Session {
+  id        Int      @id @default(autoincrement())
+  token     String   @unique
+  userId    Int
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user      Owner    @relation(fields: [userId], references: [id])
+
+  @@index([userId])
 }

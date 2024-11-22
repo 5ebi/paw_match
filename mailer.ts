@@ -7,18 +7,15 @@ console.log('SMTP_PORT:', process.env.SMTP_PORT);
 console.log('EMAIL_USER:', process.env.EMAIL_USER);
 console.log('EMAIL_PASS:', process.env.EMAIL_PASS ? 'Loaded' : 'Not Loaded');
 
-// Transporter für iCloud SMTP einrichten
+// Transporter für Gmail SMTP einrichten
 const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST, // iCloud SMTP server
-  port: parseInt(process.env.SMTP_PORT || '587', 10), // Ensure the port is a number
-  secure: false, // TLS
+  service: 'gmail', // Gmail-Service verwenden
   auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
+    user: process.env.EMAIL_USER, // Deine Gmail-Adresse
+    pass: process.env.EMAIL_PASS, // Dein Gmail-App-Passwort
   },
-  family: 4, // Enforce IPv4
-  debug: true, // Enable debugging
-  logger: true, // Log SMTP communication
+  debug: true, // Debug-Logs aktivieren
+  logger: true, // SMTP-Kommunikation protokollieren
 } as SMTPTransport.Options);
 
 // E-Mail senden Funktion
@@ -29,7 +26,7 @@ export const sendEmail = async (
 ): Promise<void> => {
   try {
     const info = await transporter.sendMail({
-      from: process.env.EMAIL_USER, // Absenderadresse
+      from: `"Paw Match" <${process.env.EMAIL_USER}>`, // Absendername und -adresse
       to, // Empfängeradresse
       subject, // Betreff
       text, // Nachrichtentext
@@ -44,3 +41,16 @@ export const sendEmail = async (
     throw error;
   }
 };
+
+(async () => {
+  try {
+    await sendEmail(
+      'test@example.com', // Ersetze durch deine eigene E-Mail-Adresse
+      'Test Email',
+      'This is a test email sent via Gmail SMTP!',
+    );
+    console.log('Test email sent successfully');
+  } catch (error) {
+    console.error('Failed to send test email:', error);
+  }
+})();
