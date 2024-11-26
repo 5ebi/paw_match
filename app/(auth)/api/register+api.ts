@@ -1,3 +1,4 @@
+import type { PostalCode } from '@prisma/client';
 import bcryptJs from 'bcryptjs';
 import { ExpoApiResponse } from '../../../ExpoApiResponse';
 import { prisma } from '../../../prismaClient';
@@ -7,6 +8,7 @@ interface RegisterBody {
   name: string;
   email: string;
   password: string;
+  postalCode: string;
 }
 
 interface SuccessResponse {
@@ -22,7 +24,6 @@ interface ErrorResponse {
 
 type RegisterResponse = SuccessResponse | ErrorResponse;
 
-// Funktion zur Generierung eines 6-stelligen Codes
 function generateVerificationCode(): string {
   return Math.floor(100000 + Math.random() * 900000).toString();
 }
@@ -35,7 +36,6 @@ export async function POST(
   try {
     const body: RegisterBody = await request.json();
 
-    // Überprüfen, ob die E-Mail bereits existiert
     const existingUser = await prisma.owner.findUnique({
       where: {
         email: body.email.toLowerCase(),
@@ -49,24 +49,22 @@ export async function POST(
       );
     }
 
-    // Generate 6-digit verification code
     const verificationCode = generateVerificationCode();
-
-    // Passwort hashen
     const passwordHash = await bcryptJs.hash(body.password, 10);
+    const formattedPostalCode = `PLZ_${body.postalCode}` as PostalCode;
 
-    // Neuen Benutzer erstellen
+    // User erstellen
     const newUser = await prisma.owner.create({
       data: {
         name: body.name,
         email: body.email.toLowerCase(),
         password: passwordHash,
-        verificationCode,
+        postalCode: formattedPostalCode, // Enum-Wert übergeben
+        verificationCode: generateVerificationCode(),
         verified: false,
       },
     });
 
-    // Send verification email
     await sendVerificationEmail(body.email, verificationCode);
 
     return ExpoApiResponse.json(

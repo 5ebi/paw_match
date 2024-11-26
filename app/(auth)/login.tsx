@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import React, { useState } from 'react';
-import { Text } from 'react-native';
+import { Text, TouchableOpacity } from 'react-native';
 import { Button, IconButton, TextInput } from 'react-native-paper';
 import FullPageContainer from '../../components/FullPageContainer';
 import H1 from '../../components/H1';
@@ -45,21 +45,22 @@ export default function Login() {
 
   return (
     <FullPageContainer>
-      <IconButton
-        icon="arrow-left"
-        iconColor="black"
-        size={28}
+      <TouchableOpacity
         onPress={() => router.back()}
         style={{
-          alignSelf: 'flex-start',
-          marginBottom: 10,
           position: 'absolute',
+          top: -30,
+          left: -40,
+          width: 100,
+          height: 100,
           zIndex: 1,
-          opacity: 0.8,
-          top: 10,
-          left: 10,
+          justifyContent: 'center',
+          alignItems: 'center',
         }}
-      />
+      >
+        <IconButton icon="arrow-left" iconColor="black" size={30} />
+      </TouchableOpacity>
+
       <H1>Log in</H1>
 
       <TextInput

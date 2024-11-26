@@ -8,8 +8,9 @@ const styles = StyleSheet.create({
     fontSize: 32,
     fontWeight: 'bold',
     color: colors.black2,
-    marginBottom: 20,
-    marginTop: 20,
+    marginBottom: 10,
+    marginTop: 0,
+    marginLeft: 0,
     textAlign: 'center', // Centers the text
     fontFamily: 'Montserrat_900Black',
   },

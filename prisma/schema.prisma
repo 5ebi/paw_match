@@ -7,17 +7,46 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum PostalCode {
+  PLZ_1010
+  PLZ_1020
+  PLZ_1030
+  PLZ_1040
+  PLZ_1050
+  PLZ_1060
+  PLZ_1070
+  PLZ_1080
+  PLZ_1090
+  PLZ_1100
+  PLZ_1110
+  PLZ_1120
+  PLZ_1130
+  PLZ_1140
+  PLZ_1150
+  PLZ_1160
+  PLZ_1170
+  PLZ_1180
+  PLZ_1190
+  PLZ_1200
+  PLZ_1210
+  PLZ_1220
+  PLZ_1230
+}
+
+
 model Owner {
-  id               Int       @id @default(autoincrement())
+  id               Int         @id @default(autoincrement())
   name             String
-  email            String    @unique
+  email            String      @unique
   password         String
-  postal_code      String?
-  verified         Boolean   @default(false)
-  createdAt        DateTime  @default(now())
+  postalCode PostalCode @map("postal_code")
+  verified         Boolean     @default(false)
+  createdAt        DateTime    @default(now())
   verificationCode String?
   sessions         Session[]
+  dogs             Dog[]
 }
+
 
 model Session {
   id        Int      @id @default(autoincrement())
@@ -28,4 +57,56 @@ model Session {
   user      Owner    @relation(fields: [userId], references: [id])
 
   @@index([userId])
+}
+
+enum DogSize {
+  SMALL
+  MEDIUM
+  LARGE
+}
+
+enum AgeGroup {
+  PUPPY       // 0-1 Jahr
+  YOUNG       // 1-3 Jahre
+  ADULT       // 3-8 Jahre
+  SENIOR      // 8+ Jahre
+}
+
+enum ActivityLevel {
+  LOW      // Entspannt, kurze Spaziergänge
+  MODERATE // Normal aktiv, regelmäßige Spaziergänge
+  HIGH     // Sehr aktiv, lange Spaziergänge, viel Spielen
+}
+
+model Dog {
+  id           Int           @id @default(autoincrement())
+  name         String
+  size         DogSize
+  birthDate    DateTime
+  activityLevel ActivityLevel
+  image        String?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  ownerId      Int
+  owner        Owner        @relation(fields: [ownerId], references: [id])
+  preferences  DogPreferences?
+
+  @@index([ownerId])
+}
+
+model DogPreferences {
+  id               Int      @id @default(autoincrement())
+  // Größenpräferenzen
+  prefersSmallDogs Boolean  @default(true)
+  prefersMediumDogs Boolean @default(true)
+  prefersLargeDogs Boolean  @default(true)
+
+  // Alterspräferenzen
+  prefersPuppy     Boolean  @default(true)
+  prefersYoung     Boolean  @default(true)
+  prefersAdult     Boolean  @default(true)
+  prefersSenior    Boolean  @default(true)
+
+  dogId           Int      @unique
+  dog             Dog      @relation(fields: [dogId], references: [id], onDelete: Cascade)
 }

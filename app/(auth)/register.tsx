@@ -1,107 +1,345 @@
-import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
-import { Text } from 'react-native';
-import { Button, IconButton, TextInput } from 'react-native-paper';
+import { Stack, useRouter } from 'expo-router';
+import React, { useCallback, useState } from 'react';
+import {
+  KeyboardAvoidingView,
+  Platform,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
+import { Button, HelperText, TextInput } from 'react-native-paper';
+import BackButton from '../../components/BackButton';
 import FullPageContainer from '../../components/FullPageContainer';
 import H1 from '../../components/H1';
 import { colors } from '../../constants/colors';
 
-export default function Register() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const router = useRouter(); // Hook for navigation
+// TypeScript Interfaces
+interface FormData {
+  email: string;
+  password: string;
+  postalCode: string;
+  name: string;
+}
 
-  const handleSubmit = async () => {
-    if (isSubmitting) return; // Prevent duplicate submissions
+interface FormErrors {
+  email?: string;
+  password?: string;
+  postalCode?: string;
+  name?: string;
+  submit?: string;
+}
+
+const ELEMENT_WIDTH = 330;
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'space-between',
+  },
+  backButton: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    zIndex: 1,
+  },
+  topSection: {
+    flex: 1,
+    alignItems: 'center', // Zentriert alle Kinder horizontal
+  },
+  headerContainer: {
+    marginTop: 10,
+    marginBottom: 30,
+    alignItems: 'center', // Zentriert den Header-Text
+  },
+  input: {
+    backgroundColor: colors.green,
+    marginBottom: 4,
+    width: ELEMENT_WIDTH,
+  },
+  inputGroup: {
+    marginBottom: 6,
+    width: ELEMENT_WIDTH, // Gleiche Breite wie Inputs
+  },
+  errorText: {
+    color: 'red',
+    marginTop: 10,
+    width: ELEMENT_WIDTH,
+    textAlign: 'center',
+  },
+  helperText: {
+    color: colors.white2,
+    width: ELEMENT_WIDTH,
+  },
+  buttonsContainer: {
+    marginTop: 'auto',
+    paddingBottom: 20,
+    alignItems: 'center', // Zentriert den Button
+  },
+  button: {
+    width: ELEMENT_WIDTH,
+    padding: 3,
+    marginBottom: 10,
+    backgroundColor: colors.text,
+  },
+});
+
+const inputTheme = {
+  colors: {
+    onSurfaceVariant: colors.white2,
+    onSurface: colors.white,
+  },
+};
+
+// Wiener Postleitzahlen als Literal Type
+const VALID_POSTAL_CODES = [
+  '1010',
+  '1020',
+  '1030',
+  '1040',
+  '1050',
+  '1060',
+  '1070',
+  '1080',
+  '1090',
+  '1100',
+  '1110',
+  '1120',
+  '1130',
+  '1140',
+  '1150',
+  '1160',
+  '1170',
+  '1180',
+  '1190',
+  '1200',
+  '1210',
+  '1220',
+  '1230',
+] as const;
+
+type ValidPostalCode = (typeof VALID_POSTAL_CODES)[number];
+
+const Register: React.FC = () => {
+  const [formData, setFormData] = useState<FormData>({
+    email: '',
+    password: '',
+    postalCode: '',
+    name: '',
+  });
+  const [errors, setErrors] = useState<FormErrors>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const router = useRouter();
+
+  const validateForm = useCallback((): boolean => {
+    const newErrors: FormErrors = {};
+
+    // Email Validierung
+    if (!formData.email) {
+      newErrors.email = 'Email is required';
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = 'Please enter a valid email address';
+    }
+
+    // Password Validierung
+    if (!formData.password) {
+      newErrors.password = 'Password is required';
+    } else if (formData.password.length < 8) {
+      newErrors.password = 'Password must be at least 8 characters long';
+    }
+
+    // Name Validierung
+    if (!formData.name) {
+      newErrors.name = 'Name is required';
+    }
+
+    // Postleitzahl Validierung
+    if (!formData.postalCode) {
+      newErrors.postalCode = 'Postal code is required';
+    } else if (
+      !VALID_POSTAL_CODES.includes(formData.postalCode as ValidPostalCode)
+    ) {
+      newErrors.postalCode = 'Please enter a valid Vienna postal code';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  }, [formData]);
+
+  const handleChange = useCallback(
+    (field: keyof FormData, value: string) => {
+      setFormData((prev) => ({
+        ...prev,
+        [field]: value,
+      }));
+      // Clear error when user starts typing
+      if (errors[field]) {
+        setErrors((prev) => ({
+          ...prev,
+          [field]: undefined,
+        }));
+      }
+    },
+    [errors],
+  );
+
+  const handleSubmit = async (): Promise<void> => {
+    if (isSubmitting) return;
+
+    if (!validateForm()) {
+      return;
+    }
+
     setIsSubmitting(true);
-    const userData = { email, password, name };
 
     try {
       const response = await fetch('/api/register', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(userData),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
       });
 
       if (response.ok) {
-        const data = await response.json();
-        setSuccess(true);
-        setError('');
-        console.log('User registered successfully:', data);
-
-        // Navigate to the verification page
         router.push('/verify');
       } else {
-        const errorData: { error?: string } = await response.json();
-        setError(errorData.error || 'Registration failed');
+        const errorData = await response.json();
+        setErrors((prev) => ({
+          ...prev,
+          submit: errorData.error || 'Registration failed',
+        }));
       }
-    } catch {
-      setError('An unexpected error occurred.');
+    } catch (error) {
+      setErrors((prev) => ({
+        ...prev,
+        submit: 'An unexpected error occurred.',
+      }));
     } finally {
-      setIsSubmitting(false); // Re-enable the button after submission
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <FullPageContainer>
-      <IconButton
-        icon="arrow-left"
-        iconColor="black"
-        size={28}
-        onPress={() => router.back()}
-        style={{
-          alignSelf: 'flex-start',
-          marginBottom: 10,
-          position: 'absolute',
-          zIndex: 1,
-          opacity: 0.8,
-          top: 10,
-          left: 10,
-        }}
-      />
+    <>
+      <Stack.Screen options={{ headerShown: false }} />
+      <FullPageContainer>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          style={{ flex: 1 }}
+          keyboardVerticalOffset={20}
+        >
+          <View style={styles.container}>
+            <BackButton />
 
-      <H1>Register</H1>
+            <View style={styles.topSection}>
+              <View style={styles.headerContainer}>
+                <H1>Register</H1>
+              </View>
 
-      <TextInput
-        label="Name"
-        value={name}
-        onChangeText={(text) => setName(text)}
-        style={{ marginBottom: 10 }}
-      />
-      <TextInput
-        label="Email"
-        value={email}
-        onChangeText={(text) => setEmail(text)}
-        style={{ marginBottom: 10 }}
-      />
-      <TextInput
-        label="Password"
-        value={password}
-        onChangeText={(text) => setPassword(text)}
-        style={{ marginBottom: 10 }}
-        secureTextEntry
-      />
+              <View style={styles.inputGroup}>
+                <TextInput
+                  mode="outlined"
+                  label="Name"
+                  value={formData.name}
+                  onChangeText={(value) => handleChange('name', value)}
+                  outlineColor={colors.white2}
+                  textColor={colors.white}
+                  activeOutlineColor={colors.white}
+                  style={styles.input}
+                  theme={inputTheme}
+                  error={!!errors.name}
+                />
+                {errors.name && (
+                  <HelperText type="error" style={styles.helperText}>
+                    {errors.name}
+                  </HelperText>
+                )}
+              </View>
 
-      {error && <Text style={{ color: 'red' }}>{error}</Text>}
-      {success && (
-        <Text style={{ color: 'green' }}>Registration successful!</Text>
-      )}
+              <View style={styles.inputGroup}>
+                <TextInput
+                  mode="outlined"
+                  label="Email"
+                  value={formData.email}
+                  onChangeText={(value) => handleChange('email', value)}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  outlineColor={colors.white2}
+                  textColor={colors.white}
+                  activeOutlineColor={colors.white}
+                  style={styles.input}
+                  theme={inputTheme}
+                  error={!!errors.email}
+                />
+                {errors.email && (
+                  <HelperText type="error" style={styles.helperText}>
+                    {errors.email}
+                  </HelperText>
+                )}
+              </View>
 
-      <Button
-        onPress={handleSubmit}
-        style={{ alignSelf: 'center', width: 332, marginBottom: 10 }}
-        textColor={colors.text}
-        mode="outlined"
-        disabled={isSubmitting}
-      >
-        {isSubmitting ? 'Submitting...' : 'Sign Up'}
-      </Button>
-    </FullPageContainer>
+              <View style={styles.inputGroup}>
+                <TextInput
+                  mode="outlined"
+                  label="Postal Code"
+                  value={formData.postalCode}
+                  onChangeText={(text) => {
+                    if (/^\d*$/.test(text)) handleChange('postalCode', text);
+                  }}
+                  keyboardType="numeric"
+                  maxLength={4}
+                  outlineColor={colors.white2}
+                  textColor={colors.white}
+                  activeOutlineColor={colors.white}
+                  style={styles.input}
+                  theme={inputTheme}
+                  error={!!errors.postalCode}
+                />
+                {errors.postalCode && (
+                  <HelperText type="error" style={styles.helperText}>
+                    {errors.postalCode}
+                  </HelperText>
+                )}
+              </View>
+
+              <View style={styles.inputGroup}>
+                <TextInput
+                  mode="outlined"
+                  label="Password"
+                  value={formData.password}
+                  onChangeText={(value) => handleChange('password', value)}
+                  secureTextEntry
+                  outlineColor={colors.white2}
+                  textColor={colors.white}
+                  activeOutlineColor={colors.white}
+                  style={styles.input}
+                  theme={inputTheme}
+                  error={!!errors.password}
+                />
+                {errors.password && (
+                  <HelperText type="error" style={styles.helperText}>
+                    {errors.password}
+                  </HelperText>
+                )}
+              </View>
+
+              {errors.submit && (
+                <Text style={styles.errorText}>{errors.submit}</Text>
+              )}
+            </View>
+          </View>
+          <View style={styles.buttonsContainer}>
+            <Button
+              onPress={handleSubmit}
+              style={styles.button}
+              mode="contained"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? 'Submitting...' : 'Sign Up'}
+            </Button>
+          </View>
+        </KeyboardAvoidingView>
+      </FullPageContainer>
+    </>
   );
-}
+};
+
+export default Register;

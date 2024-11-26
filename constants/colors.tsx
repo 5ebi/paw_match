@@ -1,7 +1,7 @@
 export const colors = {
   background: '#515a47',
-  text: '#d7be82',
-  textSecondary: '#E0D6BB',
+  text: '#fff0e3',
+  text2: '#ffedde6b',
   button: '#4754F0',
   h1: '#400406',
   h2: '#400406',
@@ -17,7 +17,8 @@ export const colors = {
   brown: '#7a4419',
   brown2: '#755c1b',
   black2: '#400406',
-  white: '#FEFEFA',
+  white: '#fff0e3',
+  white2: '#ffedde6b',
 
   black: '#111111',
 

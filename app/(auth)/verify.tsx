@@ -1,10 +1,10 @@
 import { Link, useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useCallback, useEffect, useState } from 'react';
-import { StyleSheet, TextInput, View } from 'react-native';
-import { Button, Text } from 'react-native-paper';
+import { KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native';
+import { Button, Text, TextInput } from 'react-native-paper';
+import BackButton from '../../components/BackButton';
 import FullPageContainer from '../../components/FullPageContainer';
 import H1 from '../../components/H1';
-import { ResendVerificationButton } from '../../components/ResendVerificationButton';
 import { colors } from '../../constants/colors';
 
 interface VerifyResponse {
@@ -12,50 +12,70 @@ interface VerifyResponse {
   error?: string;
 }
 
+const ELEMENT_WIDTH = 330;
+const ELEMENT_WIDTH2 = 330;
+
 const styles = StyleSheet.create({
   container: {
-    width: '100%',
-    padding: 20,
+    flex: 1,
+    justifyContent: 'space-between',
+  },
+  topSection: {
+    flex: 1,
     alignItems: 'center',
+  },
+  headerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 40,
+    marginBottom: 150,
+    paddingHorizontal: 20,
   },
   description: {
     textAlign: 'center',
     marginBottom: 20,
     color: colors.text,
+    width: ELEMENT_WIDTH2,
+    opacity: 1,
+    fontSize: 14,
   },
   input: {
-    width: 332,
-    height: 50,
-    borderWidth: 1,
-    borderColor: colors.text,
-    borderRadius: 8,
-    paddingHorizontal: 15,
+    backgroundColor: colors.green,
+    width: ELEMENT_WIDTH,
     marginBottom: 20,
-    color: colors.text,
   },
   status: {
     marginTop: 10,
     textAlign: 'center',
+    width: ELEMENT_WIDTH,
   },
-  resendContainer: {
-    marginTop: 30,
+  buttonsContainer: {
+    marginTop: 'auto',
+    paddingBottom: 20,
     alignItems: 'center',
   },
   button: {
-    alignSelf: 'center',
-    width: 332,
+    width: ELEMENT_WIDTH,
+    padding: 3,
     marginBottom: 10,
+    backgroundColor: colors.text,
   },
-  backButton: {
-    alignSelf: 'center',
-    width: 332,
-    marginTop: 20,
+  backTextButton: {
+    width: ELEMENT_WIDTH,
+    marginTop: 10,
   },
   messageText: {
     color: colors.text,
     marginBottom: 10,
   },
 });
+
+const inputTheme = {
+  colors: {
+    onSurfaceVariant: colors.white2,
+    onSurface: colors.white,
+  },
+};
 
 export default function Verify() {
   const [verificationCode, setVerificationCode] = useState('');
@@ -106,56 +126,74 @@ export default function Verify() {
 
   return (
     <FullPageContainer>
-      <H1>Verify Your Email</H1>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        style={{ flex: 1 }}
+        keyboardVerticalOffset={20}
+      >
+        <View style={styles.container}>
+          {/* <BackButton /> */}
 
-      <View style={styles.container}>
-        <Text style={styles.description}>
-          Please enter the verification code sent to your email address or click
-          the verification link in the email.
-        </Text>
+          <View style={styles.topSection}>
+            <View style={styles.headerContainer}>
+              <H1>Verify Your Email</H1>
+            </View>
 
-        <TextInput
-          style={styles.input}
-          value={verificationCode}
-          onChangeText={setVerificationCode}
-          placeholder="Enter verification code"
-          autoCapitalize="none"
-        />
+            <Text style={styles.description}>
+              Please enter the verification code sent to your email
+            </Text>
 
-        <Button
-          loading={isLoading}
-          style={styles.button}
-          textColor={colors.text}
-          mode="outlined"
-          onPress={() => handleVerification(verificationCode)}
-        >
-          {isLoading ? 'Verifying...' : 'Verify Email'}
-        </Button>
+            <TextInput
+              style={styles.input}
+              value={verificationCode}
+              onChangeText={setVerificationCode}
+              placeholder="Enter verification code"
+              mode="outlined"
+              outlineColor={colors.white2}
+              textColor={colors.white}
+              activeOutlineColor={colors.white}
+              theme={inputTheme}
+              autoCapitalize="none"
+            />
 
-        {status && (
-          <Text
-            style={[
-              styles.status,
-              {
-                color: status.includes('success') ? colors.green : colors.brown,
-              },
-            ]}
-          >
-            {status}
-          </Text>
-        )}
+            {status && (
+              <Text
+                style={[
+                  styles.status,
+                  {
+                    color: status.includes('success')
+                      ? colors.green
+                      : colors.brown,
+                  },
+                ]}
+              >
+                {status}
+              </Text>
+            )}
+          </View>
 
-        <View style={styles.resendContainer}>
-          <Text style={styles.messageText}>Didn't receive the code?</Text>
-          {email && <ResendVerificationButton email={email} />}
+          <View style={styles.buttonsContainer}>
+            <Button
+              loading={isLoading}
+              style={styles.button}
+              mode="contained"
+              onPress={() => handleVerification(verificationCode)}
+            >
+              {isLoading ? 'Verifying...' : 'Verify Email'}
+            </Button>
+
+            {/* <Link href="/welcome" asChild>
+            <Button
+              style={styles.backTextButton}
+              textColor={colors.text}
+              mode="text"
+            >
+              Back
+            </Button>
+          </Link> */}
+          </View>
         </View>
-
-        <Link href="/login" asChild>
-          <Button style={styles.backButton} textColor={colors.text} mode="text">
-            Back to Login
-          </Button>
-        </Link>
-      </View>
+      </KeyboardAvoidingView>
     </FullPageContainer>
   );
 }

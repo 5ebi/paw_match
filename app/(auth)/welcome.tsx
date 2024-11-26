@@ -9,75 +9,69 @@ import { colors } from '../../constants/colors';
 
 export default function Welcome() {
   const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      justifyContent: 'space-between',
+    },
     logoContainer: {
-      // flex: 1, // Takes up available vertical space
-      marginTop: 30,
-      justifyContent: 'center',
       alignItems: 'center',
+      paddingTop: 40,
     },
     buttonsContainer: {
-      paddingBottom: 20, // Adds some spacing from the bottom
+      marginTop: 'auto',
+      paddingBottom: 20,
+      gap: 5,
     },
     button: {
       alignSelf: 'center',
-      width: 332,
+      width: 330,
+      padding: 3,
       marginBottom: 10,
+      backgroundColor: colors.text,
+    },
+    button2: {
+      alignSelf: 'center',
+      width: 330,
+      marginBottom: 10,
+      padding: 3,
+      backgroundColor: colors.text2,
     },
   });
 
   return (
     <FullPageContainer>
-      {/* Content at the top or center */}
-      <View style={styles.logoContainer}>
-        <Logo>Paw Match</Logo>
-        <Slogan>find the pawfect match</Slogan>
-      </View>
-
-      {/* Buttons at the bottom */}
-      <View style={styles.buttonsContainer}>
-        <Button
-          style={styles.button}
-          mode="outlined"
-          onPress={() => router.push('/(auth)/register')}
-        >
-          Sign Up
-        </Button>
+      <View style={styles.container}>
+        <View style={styles.logoContainer}>
+          <Logo>Paw Match</Logo>
+          <Slogan>find the pawfect match.</Slogan>
+        </View>
 
         <Button
-          style={styles.button}
+          style={styles.button2}
           mode="contained"
-          onPress={() => router.push('/(auth)/login')}
+          onPress={() => router.push('/(auth)/addFirstDog')}
         >
-          I already have an account
+          adddog
         </Button>
+
+        <View style={styles.buttonsContainer}>
+          <Button
+            style={styles.button}
+            mode="contained"
+            onPress={() => router.push('/(auth)/register')}
+          >
+            Sign up
+          </Button>
+
+          <Button
+            style={styles.button2}
+            mode="contained"
+            onPress={() => router.push('/(auth)/login')}
+          >
+            I already have an account
+          </Button>
+        </View>
       </View>
     </FullPageContainer>
   );
 }
-
-// export default function Welcome() {
-//   return (
-//     <SafeAreaView style={styles.container}>
-//       <Text style={styles.title}>Welcome</Text>
-//       <Button title="Login" onPress={() => router.push('/(auth)/login')} />
-//       <Button
-//         title="Register"
-//         onPress={() => router.push('/(auth)/register')}
-//       />
-//     </SafeAreaView>
-//   );
-// }
-
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     justifyContent: 'center',
-//     alignItems: 'center',
-//     padding: 20,
-//   },
-//   title: {
-//     fontSize: 24,
-//     fontWeight: 'bold',
-//     marginBottom: 20,
-//   },
-// });
