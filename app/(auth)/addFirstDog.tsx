@@ -146,6 +146,7 @@ export default function AddFirstDog() {
 
   const getSession = async () => {
     const token = await sessionStorage.getSession();
+    console.log(getSession);
     if (!token) {
       throw new Error('No session found');
     }

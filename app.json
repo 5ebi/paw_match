@@ -66,8 +66,7 @@
           },
           "imageWidth": 200
         }
-      ],
-      "expo-router"
+      ]
     ]
   }
 }
