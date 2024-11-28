@@ -7,6 +7,7 @@ export async function GET(
   try {
     const url = new URL(request.url);
     const code = url.searchParams.get('code');
+    console.log('Received verification code:', code); // Debug log
 
     if (!code) {
       return ExpoApiResponse.json(
@@ -21,6 +22,9 @@ export async function GET(
         verified: false,
       },
     });
+
+    console.log('Found user:', user ? 'Yes' : 'No'); // Debug log
+    console.log('User verification code in DB:', user?.verificationCode); // Debug log
 
     if (!user) {
       return ExpoApiResponse.json(
@@ -38,6 +42,7 @@ export async function GET(
         verificationCode: null,
       },
     });
+    console.log('User verified successfully'); // Debug log
 
     return ExpoApiResponse.json(
       { message: 'Email verified successfully! You can now log in.' },

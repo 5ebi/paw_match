@@ -31,7 +31,7 @@ function generateVerificationCode(): string {
 export async function POST(
   request: Request,
 ): Promise<ExpoApiResponse<RegisterResponse>> {
-  console.log('API Route hit: /api/register');
+  console.log('API Route hit: api/register');
 
   try {
     const body: RegisterBody = await request.json();
@@ -50,6 +50,8 @@ export async function POST(
     }
 
     const verificationCode = generateVerificationCode();
+    console.log('Generated verification code:', verificationCode); // Debug log
+
     const passwordHash = await bcryptJs.hash(body.password, 10);
     const formattedPostalCode = `PLZ_${body.postalCode}` as PostalCode;
 
@@ -59,12 +61,13 @@ export async function POST(
         name: body.name,
         email: body.email.toLowerCase(),
         password: passwordHash,
-        postalCode: formattedPostalCode, // Enum-Wert übergeben
-        verificationCode: generateVerificationCode(),
+        postalCode: formattedPostalCode,
+        verificationCode: verificationCode, // Gleicher Code wie oben
         verified: false,
       },
     });
 
+    console.log('Sending verification email with code:', verificationCode); // Debug log
     await sendVerificationEmail(body.email, verificationCode);
 
     return ExpoApiResponse.json(

@@ -5,6 +5,7 @@ import { Button, IconButton, TextInput } from 'react-native-paper';
 import FullPageContainer from '../../components/FullPageContainer';
 import H1 from '../../components/H1';
 import { colors } from '../../constants/colors';
+import { sessionStorage } from '../../util/sessionStorage';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -13,7 +14,7 @@ export default function Login() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async () => {
-    if (isSubmitting) return; // Verhindere doppelte Einreichung
+    if (isSubmitting) return;
     setIsSubmitting(true);
 
     try {
@@ -25,16 +26,17 @@ export default function Login() {
         body: JSON.stringify({ email, password }),
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        setError('');
-        console.log('Login erfolgreich:', data);
+      const data = await response.json();
 
-        // Weiterleitung zu einer geschützten Seite oder Home
+      if (response.ok && data.token) {
+        sessionStorage.setSession(data.token);
+        setError('');
         router.push('/');
       } else {
-        const errorData = await response.json();
-        setError(errorData.error || 'Login fehlgeschlagen');
+        setError(data.error || 'Login fehlgeschlagen');
+        if (data.needsVerification) {
+          router.push('/verify');
+        }
       }
     } catch {
       setError('Ein unerwarteter Fehler ist aufgetreten.');

@@ -1,8 +1,7 @@
-import { Link, useLocalSearchParams, useRouter } from 'expo-router';
-import React, { useCallback, useEffect, useState } from 'react';
+import { useRouter } from 'expo-router';
+import React, { useCallback, useState } from 'react';
 import { KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native';
 import { Button, Text, TextInput } from 'react-native-paper';
-import BackButton from '../../components/BackButton';
 import FullPageContainer from '../../components/FullPageContainer';
 import H1 from '../../components/H1';
 import { colors } from '../../constants/colors';
@@ -82,7 +81,7 @@ export default function Verify() {
   const [status, setStatus] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const { email } = useLocalSearchParams<{ email: string }>();
+  // const { email } = useLocalSearchParams<{ email: string }>();
 
   const handleVerification = useCallback(
     async (code: string) => {
@@ -111,18 +110,6 @@ export default function Verify() {
     },
     [router],
   );
-
-  useEffect(() => {
-    // Check if we have a code in the URL (from email link)
-    if (typeof window !== 'undefined') {
-      const queryParams = new URLSearchParams(window.location.search);
-      const code = queryParams.get('code');
-      if (code) {
-        setVerificationCode(code);
-        handleVerification(code).catch(console.error);
-      }
-    }
-  }, [handleVerification]);
 
   return (
     <FullPageContainer>

@@ -6,6 +6,7 @@ export const colors = {
   h1: '#400406',
   h2: '#400406',
   cardBackground: 'white',
+  clear: '#ffffff0',
   // blackLicorice: '#1c110aff',
   // whiteVanilla: '#e4d6a7ff',
   // yellowHunyadiYellow: '#e9b44cff',
@@ -19,6 +20,7 @@ export const colors = {
   black2: '#400406',
   white: '#fff0e3',
   white2: '#ffedde6b',
+  red: '#ff0000',
 
   black: '#111111',
 

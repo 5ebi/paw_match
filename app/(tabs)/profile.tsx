@@ -1,44 +1,85 @@
 import { router } from 'expo-router';
-import * as React from 'react';
+import React, { useEffect, useState } from 'react';
+import { Text, View } from 'react-native';
 import { Button } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import H1 from '../../components/H1';
 import { colors } from '../../constants/colors';
+import { sessionStorage } from '../../util/sessionStorage';
 
 export default function Profile() {
-  const [isLongPressed, setIsLongPressed] = React.useState(false);
+  const [userName, setUserName] = useState<string | null>(null);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const token = await sessionStorage.getSession(); // Get session token
+        if (!token) throw new Error('No session found');
+
+        const response = await fetch('/api/user/me', {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (!response.ok) {
+          const data = await response.json();
+          throw new Error(data.error || 'Failed to fetch user data');
+        }
+
+        const { name, email } = await response.json();
+        setUserName(name);
+        setUserEmail(email);
+      } catch (err) {
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError('An unexpected error occurred.');
+        }
+      }
+    };
+
+    // Promise auflösen oder behandeln
+    fetchUser().catch((err) => console.error('Fetch user failed:', err));
+  }, []);
+
+  const handleLogout = async (): Promise<void> => {
+    try {
+      await sessionStorage.clearSession(); // Clear local session
+      router.replace('/(auth)/welcome');
+    } catch (err) {
+      console.error('Error during logout:', err);
+    }
+  };
 
   return (
     <SafeAreaView>
       <H1>Profile</H1>
+      {error ? (
+        <Text style={{ color: 'red', marginBottom: 10 }}>{error}</Text>
+      ) : (
+        <View>
+          <Text style={{ marginBottom: 5, color: colors.text }}>
+            <Text style={{ fontWeight: 'bold' }}>Name:</Text>{' '}
+            {userName || 'Loading...'}
+          </Text>
+          <Text style={{ marginBottom: 15, color: colors.text }}>
+            <Text style={{ fontWeight: 'bold' }}>Email:</Text>{' '}
+            {userEmail || 'Loading...'}
+          </Text>
+        </View>
+      )}
 
       <Button
-        mode="elevated"
-        compact={true}
-        onPress={() => router.push('/settings')}
-        onLongPress={() => setIsLongPressed(true)} // Background changes on long press
-        onPressOut={() => setIsLongPressed(false)} // Reset when button is released
+        mode="contained"
+        onPress={handleLogout}
         style={{
           alignSelf: 'center',
           marginTop: 10,
-          backgroundColor: isLongPressed ? colors.black : 'white', // Dynamic background color
+          backgroundColor: colors.text,
         }}
       >
-        Change your settings
-      </Button>
-
-      <Button
-        mode="elevated"
-        compact={true}
-        onPress={() => router.push('/welcome')}
-        buttonColor="red"
-        textColor={colors.black}
-        style={{
-          alignSelf: 'center',
-          marginTop: 10,
-        }}
-      >
-        LOG OUT
+        Logout
       </Button>
     </SafeAreaView>
   );

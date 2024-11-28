@@ -190,33 +190,53 @@ const Register: React.FC = () => {
     }
 
     setIsSubmitting(true);
+    console.log('Starting submission with data:', formData);
 
     try {
+      console.log('Attempting to fetch (auth)/api/register');
       const response = await fetch('/api/register', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify(formData),
       });
 
+      console.log('Response received:', {
+        status: response.status,
+        statusText: response.statusText,
+        headers: Object.fromEntries(response.headers.entries()),
+      });
+
+      const data = (await response.json()) as { error?: string };
+      console.log('Response data:', data);
+
       if (response.ok) {
+        console.log('Registration successful, navigating to verify');
         router.push('/verify');
       } else {
-        const errorData = await response.json();
+        console.log('Registration failed with error:', data.error);
         setErrors((prev) => ({
           ...prev,
-          submit: errorData.error || 'Registration failed',
+          submit: data.error || 'Registration failed',
         }));
       }
-    } catch (error) {
+    } catch (err) {
+      const error = err as Error;
+      console.error('Full error details:', {
+        name: error.name || 'Unknown error name',
+        message: error.message || 'Unknown error message',
+        stack: error.stack || 'No stack trace available',
+      });
+
       setErrors((prev) => ({
         ...prev,
-        submit: 'An unexpected error occurred.',
+        submit: `Error: ${error.message || 'Unknown error'}`,
       }));
     } finally {
       setIsSubmitting(false);
     }
   };
-
   return (
     <>
       <Stack.Screen options={{ headerShown: false }} />

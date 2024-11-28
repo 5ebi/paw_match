@@ -1,21 +1,7 @@
-import { Modak_400Regular } from '@expo-google-fonts/modak';
-import {
-  Montserrat_100Thin,
-  Montserrat_200ExtraLight,
-  Montserrat_300Light,
-  Montserrat_400Regular,
-  Montserrat_500Medium,
-  Montserrat_600SemiBold,
-  Montserrat_700Bold,
-  Montserrat_800ExtraBold,
-  Montserrat_900Black,
-} from '@expo-google-fonts/montserrat';
 import Constants from 'expo-constants';
-import { useFonts } from 'expo-font';
 import { Stack, useRouter } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Platform,
   SafeAreaView,
@@ -26,6 +12,7 @@ import {
 import { PaperProvider } from 'react-native-paper';
 import { colors } from '../constants/colors';
 import { darkTheme, lightTheme } from '../constants/theme';
+import { sessionStorage } from '../util/sessionStorage';
 
 const styles = StyleSheet.create({
   container: {
@@ -42,83 +29,32 @@ const styles = StyleSheet.create({
 });
 
 export default function HomeLayout() {
-  const colorScheme = useColorScheme(); // Returns 'light' or 'dark'
-
+  const colorScheme = useColorScheme();
   const router = useRouter();
-  const [isReady, setIsReady] = useState(false); // State to manage readiness
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // Replace with real login logic
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
 
-  const [fontsLoaded] = useFonts({
-    Montserrat_100Thin,
-    Montserrat_200ExtraLight,
-    Montserrat_300Light,
-    Montserrat_400Regular,
-    Montserrat_500Medium,
-    Montserrat_600SemiBold,
-    Montserrat_700Bold,
-    Montserrat_800ExtraBold,
-    Montserrat_900Black,
-    Modak_400Regular,
-  });
-
-  // Prevent the splash screen from hiding automatically
+  // Session beim App-Start prüfen
   useEffect(() => {
-    async function setupSplashScreen() {
+    const initializeApp = async () => {
       try {
-        await SplashScreen.preventAutoHideAsync();
+        const token = await sessionStorage.getSession();
+        setIsLoggedIn(!!token);
       } catch (error) {
-        console.warn('Error preventing splash screen auto-hide:', error);
+        console.warn('Error during initialization:', error);
+        setIsLoggedIn(false);
       }
-    }
-
-    setupSplashScreen().catch((error) => {
-      console.error('Unhandled error in setupSplashScreen:', error);
-    });
+    };
+    initializeApp();
   }, []);
 
+  // Routing basierend auf Login-Status
   useEffect(() => {
-    (async () => {
-      try {
-        // Simulate checking login state
-        await new Promise<void>((resolve) => {
-          setTimeout(() => resolve(), 1000); // Correctly handle the timeout
-        });
-
-        setIsLoggedIn(false); // Replace with actual login logic
-
-        if (fontsLoaded) {
-          setIsReady(true);
-        }
-      } catch (error) {
-        console.warn('Error during preparation:', error);
-      }
-    })().catch((error) => {
-      console.error('Unhandled promise in preparation:', error);
-    });
-  }, [fontsLoaded]);
-
-  useEffect(() => {
-    (async () => {
-      if (isReady) {
-        try {
-          await SplashScreen.hideAsync();
-          if (isLoggedIn) {
-            await router.replace('/(tabs)'); // Redirect to logged-in screen
-          } else {
-            await router.replace('/(auth)/welcome'); // Redirect to welcome screen
-          }
-        } catch (error) {
-          console.warn('Error during splash screen or routing:', error);
-        }
-      }
-    })().catch((error) => {
-      console.error('Unhandled promise in splash screen routing:', error);
-    });
-  }, [isReady, isLoggedIn, router]);
-
-  if (!isReady) {
-    return null; // Return nothing while splash screen is visible
-  }
+    if (isLoggedIn === true) {
+      router.replace('/(tabs)');
+    } else if (isLoggedIn === false) {
+      router.replace('/(auth)/welcome');
+    }
+  }, [isLoggedIn, router]);
 
   return (
     <PaperProvider theme={colorScheme === 'dark' ? darkTheme : lightTheme}>
