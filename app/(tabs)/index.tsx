@@ -11,9 +11,12 @@ import {
   Montserrat_900Black,
 } from '@expo-google-fonts/montserrat';
 import { useFonts } from 'expo-font';
+import { router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 // import { useEffect, useState } from 'react';
 import { SafeAreaView, StyleSheet, Text, View } from 'react-native';
+import { Button } from 'react-native-paper';
+import Slogan from '../../components/Slogan';
 // import UserItem from '../../components/UserItem';
 import { colors } from '../../constants/colors';
 
@@ -66,14 +69,25 @@ const App = () => {
   return (
     <SafeAreaView style={styles.container}>
       <View>
-        <Text style={[styles.h1, { marginBottom: 20, marginTop: 0 }]}>
+        <Text style={[styles.h1, { marginBottom: 0, marginTop: 0 }]}>
           PawMatch
         </Text>
-        <Text style={[styles.h2, { marginBottom: 10, marginTop: 0 }]}>
+        <Slogan>find the pawfect match.</Slogan>
+        {/* <Text style={[styles.h2, { marginBottom: 10, marginTop: 0 }]}>
           Find the Pawfect Match!
-        </Text>
+        </Text> */}
       </View>
-
+      <Button
+        mode="contained"
+        onPress={() => router.push('/match')}
+        style={{
+          alignSelf: 'center',
+          marginTop: 10,
+          backgroundColor: colors.white,
+        }}
+      >
+        Find a Match
+      </Button>
       <StatusBar style="dark" hidden={false} />
     </SafeAreaView>
   );

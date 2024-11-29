@@ -13,8 +13,8 @@ const styles = StyleSheet.create({
   },
   textContainer: {
     flex: 1, // Nimmt verfügbaren Platz ein
-    justifyContent: 'flex-start', // Ausrichtung des Textes am oberen Rand
-    paddingTop: 20, // Abstand nach oben
+    justifyContent: 'center', // Ausrichtung des Textes am oberen Rand
+    paddingTop: 0, // Abstand nach oben
   },
   buttonContainer: {
     paddingBottom: 20, // Abstand nach unten
@@ -30,10 +30,8 @@ export default function App() {
     <FullPageContainer>
       <View style={styles.container}>
         <View style={styles.textContainer}>
-          <H1>Thank you for creating your first Dog.</H1>
-          <H2>
-            You can create more Dogs in your Profile under "Dogs" anytime.
-          </H2>
+          <H1>Amazing!</H1>
+          <H2>You have added a Dog to your Profile</H2>
         </View>
 
         <View style={styles.buttonContainer}>
@@ -43,7 +41,7 @@ export default function App() {
               textColor={colors.text}
               mode="outlined"
             >
-              Find your first Match
+              Home
             </Button>
           </Link>
         </View>

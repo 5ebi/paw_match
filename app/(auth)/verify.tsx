@@ -96,7 +96,7 @@ export default function Verify() {
           setStatus(data.message || 'Email verified successfully!');
           // Redirect to addFirstDog after 2 seconds
           setTimeout(() => {
-            router.push('/addFirstDog');
+            router.push('/addAnotherDog');
           }, 2000);
         } else {
           setStatus(data.error || 'Verification failed');

@@ -20,8 +20,8 @@ export const colors = {
   black2: '#400406',
   white: '#fff0e3',
   white2: '#ffedde6b',
-  red: '#ff0000',
-
+  red: '#ff000067',
+  logo: '#fff0e377',
   black: '#111111',
 
   // --licorice: #1c110aff;

@@ -1,5 +1,9 @@
 import { Tabs } from 'expo-router';
-import { TabBarIcon } from '../../components/TabBarIcon';
+import {
+  TabBarIcon,
+  TabBarIcon2,
+  TabBarIcon3,
+} from '../../components/TabBarIcon';
 import { colors } from '../../constants/colors';
 
 export default function TabLayout() {
@@ -11,9 +15,9 @@ export default function TabLayout() {
         headerShown: false,
         tabBarStyle: {
           backgroundColor: colors.background,
-          borderTopColor: colors.white,
-          borderTopWidth: 1,
-          height: 50,
+          borderTopColor: colors.white2,
+          borderTopWidth: 0,
+          height: 45,
           paddingBottom: 0,
         },
       }}
@@ -23,15 +27,23 @@ export default function TabLayout() {
         options={{
           title: '',
           tabBarIcon: ({ color, focused }) =>
-            TabBarIcon({ name: focused ? 'home' : 'home-outline', color }),
+            TabBarIcon({ name: focused ? 'home' : 'home', color }),
         }}
       />
       <Tabs.Screen
-        name="newGuest"
+        name="match"
         options={{
           title: '',
           tabBarIcon: ({ color, focused }) =>
-            TabBarIcon({ name: focused ? 'add' : 'add-outline', color }),
+            TabBarIcon3({ name: focused ? 'heart-plus' : 'heart-plus', color }),
+        }}
+      />
+      <Tabs.Screen
+        name="addAnotherDog"
+        options={{
+          title: '',
+          tabBarIcon: ({ color, focused }) =>
+            TabBarIcon2({ name: focused ? 'dog' : 'dog', color }),
         }}
       />
 
@@ -40,7 +52,7 @@ export default function TabLayout() {
         options={{
           title: '',
           tabBarIcon: ({ color, focused }) =>
-            TabBarIcon({ name: focused ? 'person' : 'person-outline', color }),
+            TabBarIcon({ name: focused ? 'person' : 'person', color }),
         }}
       />
     </Tabs>
