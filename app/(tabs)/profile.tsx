@@ -2,7 +2,7 @@ import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { Text, View } from 'react-native';
 import { Button } from 'react-native-paper';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import FullPageContainer from '../../components/FullPageContainer';
 import H1 from '../../components/H1';
 import { colors } from '../../constants/colors';
 import { sessionStorage } from '../../util/sessionStorage';
@@ -18,7 +18,7 @@ export default function Profile() {
         const token = await sessionStorage.getSession(); // Get session token
         if (!token) throw new Error('No session found');
 
-        const response = await fetch('/api/user/me', {
+        const response = await fetch('/api/user', {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -53,7 +53,7 @@ export default function Profile() {
   };
 
   return (
-    <SafeAreaView>
+    <FullPageContainer>
       <H1>Profile</H1>
       {error ? (
         <Text style={{ color: 'red', marginBottom: 10 }}>{error}</Text>
@@ -81,6 +81,6 @@ export default function Profile() {
       >
         Logout
       </Button>
-    </SafeAreaView>
+    </FullPageContainer>
   );
 }

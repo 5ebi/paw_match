@@ -12,6 +12,7 @@ import BackButton from '../../components/BackButton';
 import FullPageContainer from '../../components/FullPageContainer';
 import H1 from '../../components/H1';
 import { colors } from '../../constants/colors';
+import { sessionStorage } from '../../util/sessionStorage';
 
 // TypeScript Interfaces
 interface FormData {
@@ -27,6 +28,15 @@ interface FormErrors {
   postalCode?: string;
   name?: string;
   submit?: string;
+}
+
+interface ApiResponse {
+  user: {
+    username: string;
+  };
+  message: string;
+  token: string;
+  error?: string;
 }
 
 const ELEMENT_WIDTH = 330;
@@ -133,26 +143,22 @@ const Register: React.FC = () => {
   const validateForm = useCallback((): boolean => {
     const newErrors: FormErrors = {};
 
-    // Email Validierung
     if (!formData.email) {
       newErrors.email = 'Email is required';
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = 'Please enter a valid email address';
     }
 
-    // Password Validierung
     if (!formData.password) {
       newErrors.password = 'Password is required';
     } else if (formData.password.length < 8) {
       newErrors.password = 'Password must be at least 8 characters long';
     }
 
-    // Name Validierung
     if (!formData.name) {
       newErrors.name = 'Name is required';
     }
 
-    // Postleitzahl Validierung
     if (!formData.postalCode) {
       newErrors.postalCode = 'Postal code is required';
     } else if (
@@ -171,7 +177,6 @@ const Register: React.FC = () => {
         ...prev,
         [field]: value,
       }));
-      // Clear error when user starts typing
       if (errors[field]) {
         setErrors((prev) => ({
           ...prev,
@@ -193,7 +198,7 @@ const Register: React.FC = () => {
     console.log('Starting submission with data:', formData);
 
     try {
-      console.log('Attempting to fetch (auth)/api/register');
+      console.log('Attempting to fetch /api/register');
       const response = await fetch('/api/register', {
         method: 'POST',
         headers: {
@@ -202,36 +207,46 @@ const Register: React.FC = () => {
         body: JSON.stringify(formData),
       });
 
-      console.log('Response received:', {
-        status: response.status,
-        statusText: response.statusText,
-        headers: Object.fromEntries(response.headers.entries()),
-      });
+      // Debug-Logging
+      console.log('Response status:', response.status);
+      console.log('Response headers:', response.headers);
 
-      const data = (await response.json()) as { error?: string };
-      console.log('Response data:', data);
+      const text = await response.text();
+      console.log('Raw response:', text);
 
-      if (response.ok) {
-        console.log('Registration successful, navigating to verify');
-        router.push('/verify');
-      } else {
-        console.log('Registration failed with error:', data.error);
+      try {
+        const data = JSON.parse(text);
+        console.log('Parsed data:', data);
+
+        if (response.ok && data.token) {
+          await sessionStorage.setSession(data.token);
+          console.log('Registration successful, navigating to verify');
+          router.push('/verify');
+        } else {
+          console.log('Registration failed with error:', data.error);
+          setErrors((prev) => ({
+            ...prev,
+            submit: data.error || 'Registration failed',
+          }));
+        }
+      } catch (parseError) {
+        console.error('Error parsing response:', parseError);
         setErrors((prev) => ({
           ...prev,
-          submit: data.error || 'Registration failed',
+          submit: 'Server returned invalid response',
         }));
       }
-    } catch (err) {
-      const error = err as Error;
+    } catch (error) {
+      const err = error as Error;
       console.error('Full error details:', {
-        name: error.name || 'Unknown error name',
-        message: error.message || 'Unknown error message',
-        stack: error.stack || 'No stack trace available',
+        name: err.name || 'Unknown error name',
+        message: err.message || 'Unknown error message',
+        stack: err.stack || 'No stack trace available',
       });
 
       setErrors((prev) => ({
         ...prev,
-        submit: `Error: ${error.message || 'Unknown error'}`,
+        submit: `Error: ${err.message || 'Unknown error'}`,
       }));
     } finally {
       setIsSubmitting(false);

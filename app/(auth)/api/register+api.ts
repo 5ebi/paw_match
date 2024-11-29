@@ -16,6 +16,7 @@ interface SuccessResponse {
     username: string;
   };
   message: string;
+  token: string; // Token hinzugefügt
 }
 
 interface ErrorResponse {
@@ -26,6 +27,10 @@ type RegisterResponse = SuccessResponse | ErrorResponse;
 
 function generateVerificationCode(): string {
   return Math.floor(100000 + Math.random() * 900000).toString();
+}
+
+function generateSessionToken(): string {
+  return Math.random().toString(36).substr(2) + Date.now().toString(36);
 }
 
 export async function POST(
@@ -50,31 +55,50 @@ export async function POST(
     }
 
     const verificationCode = generateVerificationCode();
-    console.log('Generated verification code:', verificationCode); // Debug log
+    console.log('Generated verification code:', verificationCode);
 
     const passwordHash = await bcryptJs.hash(body.password, 10);
     const formattedPostalCode = `PLZ_${body.postalCode}` as PostalCode;
 
-    // User erstellen
-    const newUser = await prisma.owner.create({
-      data: {
-        name: body.name,
-        email: body.email.toLowerCase(),
-        password: passwordHash,
-        postalCode: formattedPostalCode,
-        verificationCode: verificationCode, // Gleicher Code wie oben
-        verified: false,
-      },
+    // User erstellen mit Transaction
+    const { user, session } = await prisma.$transaction(async (prisma) => {
+      // User erstellen
+      const newUser = await prisma.owner.create({
+        data: {
+          name: body.name,
+          email: body.email.toLowerCase(),
+          password: passwordHash,
+          postalCode: formattedPostalCode,
+          verificationCode: verificationCode,
+          verified: false,
+        },
+      });
+
+      // Session erstellen
+      const sessionToken = generateSessionToken();
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + 7); // 7 Tage gültig
+
+      const newSession = await prisma.session.create({
+        data: {
+          token: sessionToken,
+          userId: newUser.id,
+          expiresAt,
+        },
+      });
+
+      return { user: newUser, session: newSession };
     });
 
-    console.log('Sending verification email with code:', verificationCode); // Debug log
+    console.log('Sending verification email with code:', verificationCode);
     await sendVerificationEmail(body.email, verificationCode);
 
     return ExpoApiResponse.json(
       {
-        user: { username: newUser.name },
+        user: { username: user.name },
         message:
           'Registration successful. Please check your email to verify your account.',
+        token: session.token,
       },
       { status: 201 },
     );

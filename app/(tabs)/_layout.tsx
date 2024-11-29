@@ -34,7 +34,7 @@ export default function TabLayout() {
             TabBarIcon({ name: focused ? 'add' : 'add-outline', color }),
         }}
       />
-      <Tabs.Screen
+      {/* <Tabs.Screen
         name="testboy"
         options={{
           title: '',
@@ -44,7 +44,7 @@ export default function TabLayout() {
               color,
             }),
         }}
-      />
+      /> */}
       <Tabs.Screen
         name="profile"
         options={{
