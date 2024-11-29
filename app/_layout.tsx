@@ -44,7 +44,10 @@ export default function HomeLayout() {
         setIsLoggedIn(false);
       }
     };
-    initializeApp();
+    initializeApp().catch((error) => {
+      console.error('Initialization failed:', error);
+      setIsLoggedIn(false);
+    });
   }, []);
 
   // Routing basierend auf Login-Status

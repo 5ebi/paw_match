@@ -5,7 +5,7 @@ import { colors } from '../constants/colors';
 
 const styles = StyleSheet.create({
   h1: {
-    fontSize: 32,
+    fontSize: 36,
     fontWeight: 'bold',
     color: colors.black2,
     marginBottom: 10,

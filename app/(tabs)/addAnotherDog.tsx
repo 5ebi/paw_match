@@ -266,7 +266,7 @@ export default function AddFirstDog() {
           <View style={styles.container}>
             <View style={styles.topSection}>
               <View style={styles.headerContainer}>
-                <H1>Add your Dog</H1>
+                <H1>Add a Dog</H1>
               </View>
 
               <View style={styles.inputGroup}>

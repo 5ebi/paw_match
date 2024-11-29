@@ -8,6 +8,7 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "migrate": "ley --require tsx/cjs",
+    "seed": "ts-node prisma/seed.ts",
     "start": "expo start",
     "test:email": "tsx scripts/test-email.ts",
     "web": "expo start --web"
@@ -86,5 +87,8 @@
         "listUnknownPackages": false
       }
     }
+  },
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
   }
 }
