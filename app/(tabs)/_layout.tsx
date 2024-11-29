@@ -34,17 +34,7 @@ export default function TabLayout() {
             TabBarIcon({ name: focused ? 'add' : 'add-outline', color }),
         }}
       />
-      {/* <Tabs.Screen
-        name="testboy"
-        options={{
-          title: '',
-          tabBarIcon: ({ color, focused }) =>
-            TabBarIcon({
-              name: focused ? 'warning' : 'warning-outline',
-              color,
-            }),
-        }}
-      /> */}
+
       <Tabs.Screen
         name="profile"
         options={{

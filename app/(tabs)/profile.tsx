@@ -45,6 +45,20 @@ export default function Profile() {
 
   const handleLogout = async (): Promise<void> => {
     try {
+      const token = await sessionStorage.getSession();
+      if (token) {
+        // Erst die Server-Session löschen
+        const response = await fetch('/api/logout', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) {
+          console.error('Server logout failed');
+        }
+      }
       await sessionStorage.clearSession(); // Clear local session
       router.replace('/(auth)/welcome');
     } catch (err) {
