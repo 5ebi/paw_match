@@ -60,7 +60,7 @@ export default function Welcome() {
         <View style={styles.contentContainer}>
           <View style={styles.logoContainer}>
             <Logo>Paw Match</Logo>
-            <Slogan>find the pawfect match.</Slogan>
+            <Slogan />
           </View>
 
           <View style={styles.buttonsContainer}>
@@ -71,7 +71,13 @@ export default function Welcome() {
             >
               Sign up
             </Button>
-
+            <Button
+              style={styles.button2}
+              mode="contained"
+              onPress={() => router.push('/(auth)/allDone')}
+            >
+              allDONE
+            </Button>
             <Button
               style={styles.button2}
               mode="contained"

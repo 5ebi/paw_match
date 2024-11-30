@@ -22,6 +22,7 @@ const styles = StyleSheet.create({
   button: {
     alignSelf: 'center',
     width: 332,
+    backgroundColor: colors.white,
   },
 });
 
@@ -38,8 +39,8 @@ export default function App() {
           <Link href="/(tabs)" asChild>
             <Button
               style={styles.button}
-              textColor={colors.text}
-              mode="outlined"
+              textColor={colors.black}
+              mode="contained"
             >
               Home
             </Button>

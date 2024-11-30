@@ -7,7 +7,7 @@ const styles = StyleSheet.create({
   H2: {
     fontSize: 22,
     fontWeight: 'bold',
-    color: colors.black2,
+    color: colors.white2,
     marginBottom: 20,
     textAlign: 'center', // Centers the text
     fontFamily: 'Montserrat_900Black',

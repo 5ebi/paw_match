@@ -29,7 +29,7 @@ const BackButton: React.FC<BackButtonProps> = ({
   return (
     <IconButton
       icon="arrow-left"
-      iconColor={colors.black2}
+      iconColor={colors.white2}
       size={size}
       style={[styles.backButton, style]}
       onPress={onPress || (() => router.back())}

@@ -89,14 +89,19 @@ export default function Verify() {
         setIsLoading(true);
         setStatus(null);
 
+        // API-Anfrage direkt ausführen
         const response = await fetch(`/api/verify-email?code=${code}`);
         const data: VerifyResponse = await response.json();
 
         if (response.ok) {
+          // Mindestens 2 Sekunden Loading anzeigen
+          await new Promise((resolve) => {
+            setTimeout(resolve, 10);
+          });
+
           setStatus(data.message || 'Email verified successfully!');
-          // Redirect to addFirstDog after 2 seconds
           setTimeout(() => {
-            router.push('/addAnotherDog');
+            router.push('/');
           }, 2000);
         } else {
           setStatus(data.error || 'Verification failed');
@@ -110,7 +115,6 @@ export default function Verify() {
     },
     [router],
   );
-
   return (
     <FullPageContainer>
       <KeyboardAvoidingView
@@ -168,16 +172,6 @@ export default function Verify() {
             >
               {isLoading ? 'Verifying...' : 'Verify Email'}
             </Button>
-
-            {/* <Link href="/welcome" asChild>
-            <Button
-              style={styles.backTextButton}
-              textColor={colors.text}
-              mode="text"
-            >
-              Back
-            </Button>
-          </Link> */}
           </View>
         </View>
       </KeyboardAvoidingView>

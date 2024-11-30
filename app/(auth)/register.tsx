@@ -189,61 +189,31 @@ const Register: React.FC = () => {
 
   const handleSubmit = async (): Promise<void> => {
     if (isSubmitting) return;
-
-    if (!validateForm()) {
-      return;
-    }
+    if (!validateForm()) return;
 
     setIsSubmitting(true);
-    console.log('Starting submission with data:', formData);
 
     try {
-      console.log('Attempting to fetch /api/register');
       const response = await fetch('/api/register', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       });
 
-      // Debug-Logging
-      console.log('Response status:', response.status);
-      console.log('Response headers:', response.headers);
-
       const text = await response.text();
-      console.log('Raw response:', text);
+      const data = JSON.parse(text) as ApiResponse;
 
-      try {
-        const data = JSON.parse(text);
-        console.log('Parsed data:', data);
-
-        if (response.ok && data.token) {
-          await sessionStorage.setSession(data.token);
-          console.log('Registration successful, navigating to verify');
-          router.push('/verify');
-        } else {
-          console.log('Registration failed with error:', data.error);
-          setErrors((prev) => ({
-            ...prev,
-            submit: data.error || 'Registration failed',
-          }));
-        }
-      } catch (parseError) {
-        console.error('Error parsing response:', parseError);
+      if (response.ok && data.token) {
+        await sessionStorage.setSession(data.token);
+        router.push('/verify');
+      } else {
         setErrors((prev) => ({
           ...prev,
-          submit: 'Server returned invalid response',
+          submit: data.error || 'Registration failed',
         }));
       }
     } catch (error) {
       const err = error as Error;
-      console.error('Full error details:', {
-        name: err.name || 'Unknown error name',
-        message: err.message || 'Unknown error message',
-        stack: err.stack || 'No stack trace available',
-      });
-
       setErrors((prev) => ({
         ...prev,
         submit: `Error: ${err.message || 'Unknown error'}`,
