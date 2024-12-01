@@ -7,6 +7,7 @@ interface AddDogBody {
   size: DogSize;
   birthDate: string;
   activityLevel: ActivityLevel;
+  image: string | null;
 }
 
 interface SuccessResponse {
@@ -14,6 +15,7 @@ interface SuccessResponse {
     name: string;
     size: DogSize;
     activityLevel: ActivityLevel;
+    image: string | null;
   };
   message: string;
 }
@@ -32,7 +34,6 @@ export async function POST(
   try {
     const body: AddDogBody = await request.json();
 
-    // Aktuelle Session aus dem Cookie holen
     const authHeader = request.headers.get('authorization');
     if (!authHeader) {
       return ExpoApiResponse.json(
@@ -43,7 +44,6 @@ export async function POST(
 
     const sessionToken = authHeader.replace('Bearer ', '');
 
-    // Session und zugehörigen User finden
     const session = await prisma.session.findUnique({
       where: { token: sessionToken },
       include: { user: true },
@@ -56,13 +56,13 @@ export async function POST(
       );
     }
 
-    // Hund erstellen
     const newDog = await prisma.dog.create({
       data: {
         name: body.name,
         size: body.size,
         birthDate: new Date(body.birthDate),
         activityLevel: body.activityLevel,
+        image: body.image,
         ownerId: session.user.id,
         preferences: {
           create: {
@@ -87,6 +87,7 @@ export async function POST(
           name: newDog.name,
           size: newDog.size,
           activityLevel: newDog.activityLevel,
+          image: newDog.image,
         },
         message: 'Dog added successfully',
       },

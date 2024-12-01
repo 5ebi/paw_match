@@ -17,6 +17,7 @@ interface MatchedDog {
     size: string;
     activityLevel: string;
     birthDate: string;
+    image: string | null;
   };
   score: number;
   matches: {
@@ -33,25 +34,48 @@ const styles = StyleSheet.create({
   },
   card: {
     marginBottom: 15,
-    backgroundColor: colors.green,
+    backgroundColor: colors.white2,
+    height: 450,
   },
   score: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: 'bold',
     color: colors.white,
   },
+  doggy: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: colors.black,
+    textAlign: 'left',
+    marginBottom: 10,
+    marginTop: 5,
+  },
   matchDetail: {
-    color: colors.white2,
+    color: colors.black,
     marginVertical: 5,
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   noMatches: {
     textAlign: 'center',
-    color: colors.white,
+    color: colors.black,
     marginTop: 20,
-    fontSize: 40,
+    fontSize: 20,
     alignContent: 'center',
     justifyContent: 'center',
     alignSelf: 'center',
+  },
+  cardImage: {
+    height: 300,
+    // width: 350,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    borderBottomRightRadius: 20,
+    borderBottomLeftRadius: 20,
+
+    backgroundColor: colors.white,
+    // alignSelf: 'center',
+    // alignContent: 'center',
   },
 });
 
@@ -94,15 +118,23 @@ export default function Matches() {
     <FullPageContainer>
       <ScrollView style={styles.container}>
         <H1>Match</H1>
-        {matches.length > 0 ? (
+        {matches?.length > 0 ? ( // Optional chaining hinzugefügt
           matches.map((match) => (
             <Card key={`dog-${match.dog.id}`} style={styles.card}>
+              {match.dog.image && (
+                <Card.Cover
+                  source={{ uri: match.dog.image }}
+                  style={styles.cardImage} // Neuer Style
+                />
+              )}
               <Card.Content>
-                <Text style={styles.score}>Match Score: {match.score}/10</Text>
-                <Text style={styles.matchDetail}>Name: {match.dog.name}</Text>
+                <Text style={styles.doggy}>{match.dog.name}</Text>
                 <Text style={styles.matchDetail}>Size: {match.dog.size}</Text>
                 <Text style={styles.matchDetail}>
                   Activity: {match.dog.activityLevel}
+                </Text>
+                <Text style={styles.matchDetail}>
+                  Match Score: {match.score}/10
                 </Text>
               </Card.Content>
             </Card>

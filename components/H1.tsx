@@ -7,7 +7,7 @@ const styles = StyleSheet.create({
   h1: {
     fontSize: 36,
     fontWeight: 'bold',
-    color: colors.white,
+    color: colors.white3,
     marginBottom: 10,
     marginTop: 0,
     marginLeft: 0,

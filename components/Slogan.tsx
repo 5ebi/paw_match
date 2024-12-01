@@ -1,6 +1,5 @@
-import { Modak_400Regular, useFonts } from '@expo-google-fonts/modak';
+import { useFonts } from '@expo-google-fonts/modak';
 import {
-  Montserrat_400Regular_Italic,
   Montserrat_400Regular_Italic as MontserratItalic,
   Montserrat_600SemiBold_Italic,
 } from '@expo-google-fonts/montserrat';
