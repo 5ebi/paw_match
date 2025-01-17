@@ -71,13 +71,13 @@ export default function Welcome() {
             >
               Sign up
             </Button>
-            <Button
+            {/* <Button
               style={styles.button2}
               mode="contained"
               onPress={() => router.push('/(auth)/allDone')}
             >
               allDONE
-            </Button>
+            </Button> */}
             <Button
               style={styles.button2}
               mode="contained"

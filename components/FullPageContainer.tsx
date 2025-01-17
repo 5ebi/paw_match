@@ -1,31 +1,39 @@
 import React from 'react';
-import { Keyboard, SafeAreaView, TouchableWithoutFeedback } from 'react-native';
+import {
+  Keyboard,
+  SafeAreaView,
+  StyleSheet,
+  TouchableWithoutFeedback,
+} from 'react-native';
 import { colors } from '../constants/colors';
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.background,
+    paddingHorizontal: 20,
+    height: '100%',
+  },
+});
 
 type FullPageContainerProps = {
   children: React.ReactNode;
-  dismissKeyboard?: boolean; // Optional prop falls Sie die Funktionalität manchmal deaktivieren möchten
+  dismissKeyboard?: boolean;
 };
 
 export default function FullPageContainer({
   children,
-  dismissKeyboard = true, // Standardmäßig aktiviert
+  dismissKeyboard = true,
 }: FullPageContainerProps) {
   const content = (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
-      {children}
-    </SafeAreaView>
+    <SafeAreaView style={styles.container}>{children}</SafeAreaView>
   );
 
-  // Wenn dismissKeyboard true ist, wrappen wir den Content mit TouchableWithoutFeedback
-  if (dismissKeyboard) {
-    return (
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-        {content}
-      </TouchableWithoutFeedback>
-    );
-  }
-
-  // Ansonsten geben wir den normalen Content zurück
-  return content;
+  return dismissKeyboard ? (
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+      {content}
+    </TouchableWithoutFeedback>
+  ) : (
+    content
+  );
 }

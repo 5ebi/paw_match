@@ -29,11 +29,6 @@
       "bundler": "metro",
       "output": "server"
     },
-    "extra": {
-      "eas": {
-        "projectId": "377a8753-286e-4d85-b414-311f117e53db"
-      }
-    },
     "experiments": {
       "typedRoutes": true
     },
@@ -67,6 +62,12 @@
           "imageWidth": 200
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "a69e0873-0c47-4d59-a8cd-ed0cc0ac9010"
+      }
+    },
+    "owner": "5eba5tian"
   }
 }

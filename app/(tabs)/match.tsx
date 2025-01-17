@@ -3,6 +3,7 @@ import { ScrollView, StyleSheet } from 'react-native';
 import { Card, Text } from 'react-native-paper';
 import FullPageContainer from '../../components/FullPageContainer';
 import H1 from '../../components/H1';
+import H2 from '../../components/H2';
 import { colors } from '../../constants/colors';
 import { sessionStorage } from '../../util/sessionStorage';
 
@@ -31,6 +32,7 @@ interface MatchedDog {
 const styles = StyleSheet.create({
   container: {
     padding: 10,
+    backgroundColor: colors.green,
   },
   card: {
     marginBottom: 15,
@@ -115,34 +117,33 @@ export default function Matches() {
   }
 
   return (
-    <FullPageContainer>
-      <ScrollView style={styles.container}>
-        <H1>Match</H1>
-        {matches?.length > 0 ? ( // Optional chaining hinzugefügt
-          matches.map((match) => (
-            <Card key={`dog-${match.dog.id}`} style={styles.card}>
-              {match.dog.image && (
-                <Card.Cover
-                  source={{ uri: match.dog.image }}
-                  style={styles.cardImage} // Neuer Style
-                />
-              )}
-              <Card.Content>
-                <Text style={styles.doggy}>{match.dog.name}</Text>
-                <Text style={styles.matchDetail}>Size: {match.dog.size}</Text>
-                <Text style={styles.matchDetail}>
-                  Activity: {match.dog.activityLevel}
-                </Text>
-                <Text style={styles.matchDetail}>
-                  Match Score: {match.score}/10
-                </Text>
-              </Card.Content>
-            </Card>
-          ))
-        ) : (
-          <Text style={styles.noMatches}>No matches found in your area :(</Text>
-        )}
-      </ScrollView>
-    </FullPageContainer>
+    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+      <H1>Match</H1>
+      <H2>find matching Dogs below</H2>
+      {matches.length > 0 ? ( // Optional chaining hinzugefügt
+        matches.map((match) => (
+          <Card key={`dog-${match.dog.id}`} style={styles.card}>
+            {match.dog.image && (
+              <Card.Cover
+                source={{ uri: match.dog.image }}
+                style={styles.cardImage} // Neuer Style
+              />
+            )}
+            <Card.Content>
+              <Text style={styles.doggy}>{match.dog.name}</Text>
+              <Text style={styles.matchDetail}>Size: {match.dog.size}</Text>
+              <Text style={styles.matchDetail}>
+                Activity: {match.dog.activityLevel}
+              </Text>
+              <Text style={styles.matchDetail}>
+                Match Score: {match.score}/10
+              </Text>
+            </Card.Content>
+          </Card>
+        ))
+      ) : (
+        <Text style={styles.noMatches}>No matches found in your area :(</Text>
+      )}
+    </ScrollView>
   );
 }

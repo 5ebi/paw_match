@@ -1,13 +1,17 @@
 import { ExpoApiResponse } from '../../../ExpoApiResponse';
 import { prisma } from '../../../prismaClient';
 
+interface UserResponse {
+  name: string;
+  email: string;
+  dogs: any[];
+}
+
 export async function GET(
-  request: Request,
-): Promise<
-  ExpoApiResponse<{ name: string; email: string } | { error: string }>
-> {
+  Request: Request,
+): Promise<ExpoApiResponse<UserResponse | { error: string }>> {
   try {
-    const authHeader = request.headers.get('authorization');
+    const authHeader = Request.headers.get('authorization');
     if (!authHeader) {
       return ExpoApiResponse.json(
         { error: 'Not authenticated' },
@@ -18,7 +22,22 @@ export async function GET(
     const sessionToken = authHeader.replace('Bearer ', '');
     const session = await prisma.session.findUnique({
       where: { token: sessionToken },
-      include: { user: true },
+      include: {
+        user: {
+          include: {
+            dogs: {
+              select: {
+                id: true,
+                name: true,
+                image: true,
+                size: true,
+                activityLevel: true,
+                birthDate: true,
+              },
+            },
+          },
+        },
+      },
     });
 
     if (!session || session.expiresAt < new Date()) {
@@ -28,8 +47,8 @@ export async function GET(
       );
     }
 
-    const { name, email } = session.user;
-    return ExpoApiResponse.json({ name, email }, { status: 200 });
+    const { name, email, dogs } = session.user;
+    return ExpoApiResponse.json({ name, email, dogs }, { status: 200 });
   } catch (error) {
     console.error('Error fetching user:', error);
     return ExpoApiResponse.json(

@@ -2,9 +2,15 @@ import { ActivityLevel, DogSize } from '@prisma/client';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import SegmentedControl from '@react-native-segmented-control/segmented-control';
 import * as ImagePicker from 'expo-image-picker';
-import { Stack, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import React, { useCallback, useState } from 'react';
-import { Image, KeyboardAvoidingView, StyleSheet, View } from 'react-native';
+import {
+  Image,
+  KeyboardAvoidingView,
+  ScrollView,
+  StyleSheet,
+  View,
+} from 'react-native';
 import {
   Button,
   HelperText,
@@ -25,6 +31,13 @@ const inputTheme = {
     onSurface: colors.white,
   },
 };
+
+interface CloudinaryResponse {
+  secure_url: string;
+  error?: {
+    message: string;
+  };
+}
 
 interface DogFormData {
   name: string;
@@ -98,11 +111,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 10,
   },
-  previewImage: {
-    width: ELEMENT_WIDTH,
-    height: 200,
-    borderRadius: 8,
+  previewImageContainer: {
+    marginTop: 10,
     marginBottom: 10,
+    width: ELEMENT_WIDTH,
+    aspectRatio: 4 / 4,
+  },
+  previewImage: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 8,
   },
   dateButton: {
     backgroundColor: colors.green,
@@ -162,8 +180,8 @@ export default function AddFirstDog() {
   const router = useRouter();
 
   const formatDate = (date: Date | null) => {
-    if (!date) return 'Geburtstag auswählen';
-    return date.toLocaleDateString('de-DE', {
+    if (!date) return 'Select birthday';
+    return date.toLocaleDateString('en-US', {
       year: 'numeric',
       month: '2-digit',
       day: '2-digit',
@@ -177,76 +195,66 @@ export default function AddFirstDog() {
     }
     return { token };
   };
+
   const pickImage = async () => {
     try {
-      console.log('Starting image pick...');
       const { status } =
         await ImagePicker.requestMediaLibraryPermissionsAsync();
-      console.log('Permission status:', status);
 
       if (status !== 'granted') {
-        console.log('Permission denied');
         setErrors((prev) => ({
           ...prev,
-          submit: 'Berechtigung zum Zugriff auf die Mediathek verweigert',
+          submit: 'Permission to access media library was denied',
         }));
         return;
       }
 
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: 'images', // Verwende string literal 'images'
+        mediaTypes: 'images',
         allowsEditing: true,
-        aspect: [4, 3],
+        aspect: [4, 4], // Quadratic aspect ratio
         quality: 0.8,
       });
-      console.log('ImagePicker result:', result);
 
       if (!result.canceled && result.assets[0]) {
-        console.log('Image selected:', result.assets[0]);
-
         const uploadFormData = new FormData();
         uploadFormData.append('file', {
           uri: result.assets[0].uri,
-          type: 'image/jpeg', // Stelle sicher, dass der MIME-Typ korrekt ist
-          name: 'dog.jpg', // Optional: Generiere einen eindeutigen Namen
+          type: 'image/jpeg',
+          name: 'dog.jpg',
         } as any);
-        uploadFormData.append('upload_preset', 'pawmatch'); // Stelle sicher, dass dies dem Preset-Namen in Cloudinary entspricht
-
-        console.log('Uploading to Cloudinary with preset:', 'pawmatch');
+        uploadFormData.append('upload_preset', 'pawmatch');
 
         const response = await fetch(
           `https://api.cloudinary.com/v1_1/${cloudinaryConfig.cloudName}/upload`,
           {
             method: 'POST',
             body: uploadFormData,
-            // **Wichtig**: Entferne den 'Content-Type' Header, wenn du FormData verwendest
-            // 'Content-Type': 'multipart/form-data',
           },
         );
 
-        const data = await response.json();
-        console.log('Cloudinary response:', data);
+        const data = (await response.json()) as CloudinaryResponse;
 
         if (response.ok) {
-          // Erfolgreicher Upload
           setFormData((prev) => ({
             ...prev,
-            image: data.secure_url, // Verwende die sichere URL
+            image: data.secure_url,
           }));
-        } else {
-          // Fehlerbehandlung
-          console.error('Cloudinary Error:', data);
           setErrors((prev) => ({
             ...prev,
-            submit: data.error.message || 'Fehler beim Hochladen des Bildes',
+            image: undefined,
+          }));
+        } else {
+          setErrors((prev) => ({
+            ...prev,
+            submit: data.error?.message || 'Error uploading image',
           }));
         }
       }
     } catch (error) {
-      console.error('Upload error:', error);
       setErrors((prev) => ({
         ...prev,
-        submit: 'Ein unerwarteter Fehler ist aufgetreten',
+        submit: 'An unexpected error occurred',
       }));
     }
   };
@@ -255,17 +263,17 @@ export default function AddFirstDog() {
     const newErrors: FormErrors = {};
 
     if (!formData.name) {
-      newErrors.name = 'Hundename wird benötigt';
+      newErrors.name = 'Dog name is required';
     }
 
     if (!formData.birthDate) {
-      newErrors.birthDate = 'Geburtstag wird benötigt';
+      newErrors.birthDate = 'Birthdate is required';
     } else if (formData.birthDate > new Date()) {
-      newErrors.birthDate = 'Geburtstag kann nicht in der Zukunft liegen';
+      newErrors.birthDate = 'Birthdate cannot be in the future';
     }
 
     if (!formData.image) {
-      newErrors.image = 'Bitte füge ein Foto deines Hundes hinzu';
+      newErrors.image = 'Please add a photo of your dog';
     }
 
     setErrors(newErrors);
@@ -337,10 +345,9 @@ export default function AddFirstDog() {
 
       router.push('/allDone');
     } catch (err) {
-      console.error('Error:', err);
       setErrors((prev) => ({
         ...prev,
-        submit: 'Fehler beim Hinzufügen des Hundes',
+        submit: 'Error adding dog',
       }));
     } finally {
       setIsSubmitting(false);
@@ -348,209 +355,203 @@ export default function AddFirstDog() {
   };
 
   return (
-    <>
-      <Stack.Screen options={{ headerShown: false }} />
-      <FullPageContainer>
-        <KeyboardAvoidingView
-          behavior="padding"
-          style={{ flex: 1 }}
-          keyboardVerticalOffset={20}
-        >
-          <View style={styles.container}>
-            <View style={styles.topSection}>
-              <View style={styles.headerContainer}>
-                <H1>Hund hinzufügen</H1>
-              </View>
-
-              <View style={styles.inputGroup}>
-                <TextInput
-                  mode="outlined"
-                  label="Hundename"
-                  value={formData.name}
-                  onChangeText={(value) => handleChange('name', value)}
-                  outlineColor={colors.white2}
-                  textColor={colors.white}
-                  activeOutlineColor={colors.white}
-                  style={styles.input}
-                  theme={inputTheme}
-                  error={!!errors.name}
-                />
-                {errors.name && (
-                  <HelperText type="error" style={styles.helperText}>
-                    {errors.name}
-                  </HelperText>
-                )}
-              </View>
-
-              <View style={styles.inputGroup}>
-                <Button
-                  mode="outlined"
-                  onPress={pickImage}
-                  style={styles.imageButton}
-                >
-                  {formData.image ? 'Foto ändern' : 'Hundefoto hinzufügen'}
-                </Button>
-
-                {formData.image && (
-                  <Image
-                    source={{ uri: formData.image }}
-                    style={styles.previewImage}
-                  />
-                )}
-                {errors.image && (
-                  <HelperText type="error" style={styles.helperText}>
-                    {errors.image}
-                  </HelperText>
-                )}
-              </View>
-
-              <View style={styles.inputGroup}>
-                <Text style={[styles.helperText, { marginBottom: 8 }]}>
-                  Größe
-                </Text>
-                <SegmentedControl
-                  values={['Klein', 'Mittel', 'Groß']}
-                  selectedIndex={selectedIndex}
-                  onChange={(event) => {
-                    const index = event.nativeEvent.selectedSegmentIndex;
-                    setSelectedIndex(index);
-                    const sizeValues: DogSize[] = [
-                      DogSize.SMALL,
-                      DogSize.MEDIUM,
-                      DogSize.LARGE,
-                    ];
-                    const newSize = sizeValues[index];
-                    if (newSize) {
-                      setFormData((prev) => ({
-                        ...prev,
-                        size: newSize,
-                      }));
-                    }
-                  }}
-                  style={styles.segmentedButton}
-                  appearance="dark"
-                  backgroundColor={colors.green}
-                  tintColor={colors.white2}
-                  activeFontStyle={{ color: colors.white }}
-                  fontStyle={{ color: colors.white2 }}
-                />
-              </View>
-
-              <View style={styles.inputGroup}>
-                <Text style={[styles.helperText, { marginBottom: 8 }]}>
-                  Aktivitätslevel
-                </Text>
-                <SegmentedControl
-                  values={['Entspannt', 'Aktiv', 'Sehr Aktiv']}
-                  selectedIndex={selectedActivityIndex}
-                  onChange={(event) => {
-                    const index = event.nativeEvent.selectedSegmentIndex;
-                    setSelectedActivityIndex(index);
-                    const activityValues: ActivityLevel[] = [
-                      ActivityLevel.LOW,
-                      ActivityLevel.MODERATE,
-                      ActivityLevel.HIGH,
-                    ];
-                    const newActivity = activityValues[index];
-                    if (newActivity) {
-                      setFormData((prev) => ({
-                        ...prev,
-                        activityLevel: newActivity,
-                      }));
-                    }
-                  }}
-                  style={styles.segmentedButton}
-                  appearance="dark"
-                  backgroundColor={colors.green}
-                  tintColor={colors.white2}
-                  activeFontStyle={{ color: colors.white }}
-                  fontStyle={{ color: colors.white2 }}
-                />
-              </View>
-
-              <View style={styles.inputGroup}>
-                <Button
-                  mode="outlined"
-                  onPress={() => {
-                    setTempDate(formData.birthDate || new Date());
-                    setShowDatePicker(true);
-                  }}
-                  style={styles.dateButton}
-                >
-                  <Text
-                    style={[
-                      styles.dateText,
-                      {
-                        color: formData.birthDate
-                          ? colors.white
-                          : colors.white2,
-                      },
-                    ]}
-                  >
-                    {formData.birthDate
-                      ? formatDate(formData.birthDate)
-                      : 'Geburtstag auswählen'}
-                  </Text>
-                </Button>
-
-                <Portal>
-                  <Modal
-                    visible={showDatePicker}
-                    onDismiss={handleCancelDate}
-                    contentContainerStyle={styles.modalContent}
-                  >
-                    <View style={styles.datePickerContainer}>
-                      <DateTimePicker
-                        value={tempDate || new Date()}
-                        mode="date"
-                        display="spinner"
-                        onChange={handleDateChange}
-                        maximumDate={new Date()}
-                        textColor={colors.white}
-                        themeVariant="dark"
-                        locale="de-DE"
-                      />
-                    </View>
-                    <View style={styles.modalButtons}>
-                      <Button
-                        mode="outlined"
-                        onPress={handleCancelDate}
-                        style={styles.modalButton}
-                      >
-                        Abbrechen
-                      </Button>
-                      <Button
-                        mode="contained"
-                        onPress={handleConfirmDate}
-                        style={styles.modalButton2}
-                      >
-                        Bestätigen
-                      </Button>
-                    </View>
-                  </Modal>
-                </Portal>
-
-                {errors.birthDate && (
-                  <HelperText type="error" style={styles.helperText}>
-                    {errors.birthDate}
-                  </HelperText>
-                )}
-              </View>
-
-              <View style={styles.buttonsContainer}>
-                <Button
-                  onPress={handleSubmit}
-                  style={styles.button}
-                  mode="contained"
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? 'Wird hinzugefügt...' : 'Hund hinzufügen'}
-                </Button>
-              </View>
-            </View>
+    // <FullPageContainer>
+    <ScrollView
+      style={{ backgroundColor: colors.green }}
+      showsVerticalScrollIndicator={false}
+    >
+      {/* <KeyboardAvoidingView behavior="padding" keyboardVerticalOffset={20}> */}
+      <View style={styles.container}>
+        <View style={styles.topSection}>
+          <View style={styles.headerContainer}>
+            <H1>Add Dog</H1>
           </View>
-        </KeyboardAvoidingView>
-      </FullPageContainer>
-    </>
+
+          <View style={styles.inputGroup}>
+            <TextInput
+              mode="outlined"
+              label="Dog Name"
+              value={formData.name}
+              onChangeText={(value) => handleChange('name', value)}
+              outlineColor={colors.white2}
+              textColor={colors.white}
+              activeOutlineColor={colors.white}
+              style={styles.input}
+              theme={inputTheme}
+              error={!!errors.name}
+            />
+            {errors.name && (
+              <HelperText type="error" style={styles.helperText}>
+                {errors.name}
+              </HelperText>
+            )}
+          </View>
+
+          <View style={styles.inputGroup}>
+            <Button
+              mode="outlined"
+              onPress={pickImage}
+              style={styles.imageButton}
+            >
+              {formData.image ? 'Change Photo' : 'Add Dog Photo'}
+            </Button>
+
+            {formData.image && (
+              <View style={styles.previewImageContainer}>
+                <Image
+                  source={{ uri: formData.image }}
+                  style={styles.previewImage}
+                  resizeMode="cover"
+                />
+              </View>
+            )}
+            {errors.image && (
+              <HelperText type="error" style={styles.helperText}>
+                {errors.image}
+              </HelperText>
+            )}
+          </View>
+
+          <View style={styles.inputGroup}>
+            <Text style={[styles.helperText, { marginBottom: 8 }]}>Size</Text>
+            <SegmentedControl
+              values={['Small', 'Medium', 'Large']}
+              selectedIndex={selectedIndex}
+              onChange={(event) => {
+                const index = event.nativeEvent.selectedSegmentIndex;
+                setSelectedIndex(index);
+                const sizeValues: DogSize[] = [
+                  DogSize.SMALL,
+                  DogSize.MEDIUM,
+                  DogSize.LARGE,
+                ];
+                const newSize = sizeValues[index];
+                if (newSize) {
+                  setFormData((prev) => ({
+                    ...prev,
+                    size: newSize,
+                  }));
+                }
+              }}
+              style={styles.segmentedButton}
+              appearance="dark"
+              backgroundColor={colors.green}
+              tintColor={colors.white2}
+              activeFontStyle={{ color: colors.white }}
+              fontStyle={{ color: colors.white2 }}
+            />
+          </View>
+
+          <View style={styles.inputGroup}>
+            <Text style={[styles.helperText, { marginBottom: 8 }]}>
+              Activity Level
+            </Text>
+            <SegmentedControl
+              values={['Low', 'Moderate', 'High']}
+              selectedIndex={selectedActivityIndex}
+              onChange={(event) => {
+                const index = event.nativeEvent.selectedSegmentIndex;
+                setSelectedActivityIndex(index);
+                const activityValues: ActivityLevel[] = [
+                  ActivityLevel.LOW,
+                  ActivityLevel.MODERATE,
+                  ActivityLevel.HIGH,
+                ];
+                const newActivity = activityValues[index];
+                if (newActivity) {
+                  setFormData((prev) => ({
+                    ...prev,
+                    activityLevel: newActivity,
+                  }));
+                }
+              }}
+              style={styles.segmentedButton}
+              appearance="dark"
+              backgroundColor={colors.green}
+              tintColor={colors.white2}
+              activeFontStyle={{ color: colors.white }}
+              fontStyle={{ color: colors.white2 }}
+            />
+          </View>
+
+          <View style={styles.inputGroup}>
+            <Button
+              mode="outlined"
+              onPress={() => {
+                setTempDate(formData.birthDate || new Date());
+                setShowDatePicker(true);
+              }}
+              style={styles.dateButton}
+            >
+              <Text
+                style={[
+                  styles.dateText,
+                  {
+                    color: formData.birthDate ? colors.white : colors.white2,
+                  },
+                ]}
+              >
+                {formatDate(formData.birthDate)}
+              </Text>
+            </Button>
+
+            <Portal>
+              <Modal
+                visible={showDatePicker}
+                onDismiss={handleCancelDate}
+                contentContainerStyle={styles.modalContent}
+              >
+                <View style={styles.datePickerContainer}>
+                  <DateTimePicker
+                    value={tempDate || new Date()}
+                    mode="date"
+                    display="spinner"
+                    onChange={handleDateChange}
+                    maximumDate={new Date()}
+                    textColor={colors.white}
+                    themeVariant="dark"
+                    locale="en-US"
+                  />
+                </View>
+                <View style={styles.modalButtons}>
+                  <Button
+                    mode="outlined"
+                    onPress={handleCancelDate}
+                    style={styles.modalButton}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    mode="contained"
+                    onPress={handleConfirmDate}
+                    style={styles.modalButton2}
+                  >
+                    Confirm
+                  </Button>
+                </View>
+              </Modal>
+            </Portal>
+
+            {errors.birthDate && (
+              <HelperText type="error" style={styles.helperText}>
+                {errors.birthDate}
+              </HelperText>
+            )}
+          </View>
+
+          <View style={styles.buttonsContainer}>
+            <Button
+              onPress={handleSubmit}
+              style={styles.button}
+              mode="contained"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? 'Adding...' : 'Add Dog'}
+            </Button>
+          </View>
+        </View>
+      </View>
+    </ScrollView>
+    // </FullPageContainer>
   );
 }

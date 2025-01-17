@@ -2,11 +2,21 @@ import { ActivityLevel, DogSize } from '@prisma/client';
 import { ExpoApiResponse } from '../../../ExpoApiResponse';
 import { prisma } from '../../../prismaClient';
 
+const defaultPreferences = {
+  prefersSmallDogs: true,
+  prefersMediumDogs: true,
+  prefersLargeDogs: true,
+  prefersPuppy: true,
+  prefersYoung: true,
+  prefersAdult: true,
+  prefersSenior: true,
+} as const;
+
 interface AddDogBody {
-  name: string;
-  size: DogSize;
-  birthDate: string;
-  activityLevel: ActivityLevel;
+  name?: string;
+  size?: DogSize;
+  birthDate?: string;
+  activityLevel?: ActivityLevel;
   image: string | null;
 }
 
@@ -32,7 +42,23 @@ export async function POST(
   console.log('API Route hit: /api/addFirstDog');
 
   try {
-    const body: AddDogBody = await request.json();
+    let body: AddDogBody;
+    try {
+      body = await request.json();
+    } catch {
+      return ExpoApiResponse.json(
+        { error: 'Invalid request body' },
+        { status: 400 },
+      );
+    }
+
+    // Validate required fields
+    if (!body.name || !body.size || !body.birthDate || !body.activityLevel) {
+      return ExpoApiResponse.json(
+        { error: 'Missing required fields' },
+        { status: 400 },
+      );
+    }
 
     const authHeader = request.headers.get('authorization');
     if (!authHeader) {
@@ -45,11 +71,16 @@ export async function POST(
     const sessionToken = authHeader.replace('Bearer ', '');
 
     const session = await prisma.session.findUnique({
-      where: { token: sessionToken },
+      where: {
+        token: sessionToken,
+        expiresAt: {
+          gt: new Date(),
+        },
+      },
       include: { user: true },
     });
 
-    if (!session || session.expiresAt < new Date()) {
+    if (!session) {
       return ExpoApiResponse.json(
         { error: 'Invalid or expired session' },
         { status: 401 },
@@ -65,15 +96,7 @@ export async function POST(
         image: body.image,
         ownerId: session.user.id,
         preferences: {
-          create: {
-            prefersSmallDogs: true,
-            prefersMediumDogs: true,
-            prefersLargeDogs: true,
-            prefersPuppy: true,
-            prefersYoung: true,
-            prefersAdult: true,
-            prefersSenior: true,
-          },
+          create: defaultPreferences,
         },
       },
       include: {

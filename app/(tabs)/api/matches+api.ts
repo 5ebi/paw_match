@@ -35,13 +35,13 @@ function calculateMatchScore(
   let score = 0;
 
   if (dog1.size === dog2.size) {
-    score += 3;
+    score += 2;
   }
   if (dog1.activityLevel === dog2.activityLevel) {
-    score += 3;
+    score += 4;
   }
   if (calculateAgeGroup(dog1.birthDate) === calculateAgeGroup(dog2.birthDate)) {
-    score += 2;
+    score += 4;
   }
 
   return score;

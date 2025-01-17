@@ -16,6 +16,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
 import { SafeAreaView, StyleSheet, View } from 'react-native';
 import { Button } from 'react-native-paper';
+import BackgroundSvg from '../../components/BackgroundSvg';
 import Logo from '../../components/Logo';
 import Slogan from '../../components/Slogan';
 import { colors } from '../../constants/colors';
@@ -62,12 +63,22 @@ const App = () => {
     container: {
       flex: 1,
       backgroundColor: colors.background,
+      justifyContent: 'space-between',
+    },
+    backgroundSvg: {
+      position: 'absolute',
+      top: -50,
+      left: 0,
+      width: '100%',
+      height: '100%',
+      opacity: 0.5,
+      zIndex: 1,
     },
     container2: {
       flex: 1,
       backgroundColor: colors.background,
       alignItems: 'center',
-      justifyContent: 'center',
+      // justifyContent: 'space-between',
     },
     h2: {
       color: colors.h2,
@@ -91,9 +102,12 @@ const App = () => {
     },
     button: {
       alignSelf: 'center',
-      marginTop: 10,
+      marginTop: 'auto',
       backgroundColor: colors.white,
       width: 330,
+      zIndex: 2,
+      marginBottom: 30,
+      padding: 3,
     },
   });
 
@@ -105,6 +119,7 @@ const App = () => {
         <Logo>PawMatch</Logo>
         <Slogan />
       </View>
+      <BackgroundSvg style={styles.backgroundSvg} />
       <View style={styles.container2}>
         {hasDog ? (
           <Button
