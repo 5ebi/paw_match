@@ -355,7 +355,6 @@ export default function AddFirstDog() {
   };
 
   return (
-    // <FullPageContainer>
     <ScrollView
       style={{ backgroundColor: colors.green }}
       showsVerticalScrollIndicator={false}
@@ -552,6 +551,5 @@ export default function AddFirstDog() {
         </View>
       </View>
     </ScrollView>
-    // </FullPageContainer>
   );
 }
