@@ -4,13 +4,7 @@ import SegmentedControl from '@react-native-segmented-control/segmented-control'
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import React, { useCallback, useState } from 'react';
-import {
-  Image,
-  KeyboardAvoidingView,
-  ScrollView,
-  StyleSheet,
-  View,
-} from 'react-native';
+import { Image, ScrollView, StyleSheet, View } from 'react-native';
 import {
   Button,
   HelperText,
@@ -19,8 +13,6 @@ import {
   Text,
   TextInput,
 } from 'react-native-paper';
-import { cloudinaryConfig } from '../../cloudinaryConfig';
-import FullPageContainer from '../../components/FullPageContainer';
 import H1 from '../../components/H1';
 import { colors } from '../../constants/colors';
 import { sessionStorage } from '../../util/sessionStorage';
@@ -31,13 +23,6 @@ const inputTheme = {
     onSurface: colors.white,
   },
 };
-
-interface CloudinaryResponse {
-  secure_url: string;
-  error?: {
-    message: string;
-  };
-}
 
 interface DogFormData {
   name: string;
@@ -200,62 +185,44 @@ export default function AddFirstDog() {
     try {
       const { status } =
         await ImagePicker.requestMediaLibraryPermissionsAsync();
-
       if (status !== 'granted') {
-        setErrors((prev) => ({
-          ...prev,
-          submit: 'Permission to access media library was denied',
-        }));
+        setErrors((prev) => ({ ...prev, submit: 'Permission denied' }));
         return;
       }
 
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: 'images',
         allowsEditing: true,
-        aspect: [4, 4], // Quadratic aspect ratio
+        aspect: [4, 4],
         quality: 0.8,
       });
 
       if (!result.canceled && result.assets[0]) {
+        const response = await fetch(result.assets[0].uri);
+        const blob = await response.blob();
+
         const uploadFormData = new FormData();
-        uploadFormData.append('file', {
-          uri: result.assets[0].uri,
-          type: 'image/jpeg',
-          name: 'dog.jpg',
-        } as any);
+        uploadFormData.append('file', blob);
         uploadFormData.append('upload_preset', 'pawmatch');
 
-        const response = await fetch(
-          `https://api.cloudinary.com/v1_1/${cloudinaryConfig.cloudName}/upload`,
+        const uploadResponse = await fetch(
+          'https://api.cloudinary.com/v1_1/pawmatch/upload',
           {
             method: 'POST',
             body: uploadFormData,
           },
         );
 
-        const data = (await response.json()) as CloudinaryResponse;
-
-        if (response.ok) {
-          setFormData((prev) => ({
-            ...prev,
-            image: data.secure_url,
-          }));
-          setErrors((prev) => ({
-            ...prev,
-            image: undefined,
-          }));
+        const data = (await uploadResponse.json()) as { secure_url?: string };
+        if (data.secure_url) {
+          setFormData((prev) => ({ ...prev, image: data.secure_url || null }));
+          setErrors((prev) => ({ ...prev, image: undefined }));
         } else {
-          setErrors((prev) => ({
-            ...prev,
-            submit: data.error?.message || 'Error uploading image',
-          }));
+          setErrors((prev) => ({ ...prev, submit: 'Upload failed' }));
         }
       }
     } catch (error) {
-      setErrors((prev) => ({
-        ...prev,
-        submit: 'An unexpected error occurred',
-      }));
+      setErrors((prev) => ({ ...prev, submit: 'Upload error' }));
     }
   };
 
