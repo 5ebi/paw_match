@@ -68,6 +68,12 @@
         "projectId": "a69e0873-0c47-4d59-a8cd-ed0cc0ac9010"
       }
     },
-    "owner": "5eba5tian"
+    "owner": "5eba5tian",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/a69e0873-0c47-4d59-a8cd-ed0cc0ac9010"
+    }
   }
 }

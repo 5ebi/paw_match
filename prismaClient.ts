@@ -1,5 +1,3 @@
-// prismaClient.ts
-
 import { PrismaClient } from '@prisma/client';
 
 declare global {
@@ -7,11 +5,14 @@ declare global {
   var prisma: PrismaClient | undefined;
 }
 
-export const prisma =
-  global.prisma ||
-  new PrismaClient({
+const prismaClientSingleton = () => {
+  return new PrismaClient({
     log: ['query'],
+    // Internal options für Web-Kompatibilität entfernt
   });
+};
+
+export const prisma = global.prisma ?? prismaClientSingleton();
 
 if (process.env.NODE_ENV !== 'production') {
   global.prisma = prisma;
