@@ -1,6 +1,6 @@
 # 🐾 Paw Match  
 
-Paw Match is a mobile app designed for **dog owners** who want to find the perfect match for their dog. Whether it's for playdates, socialization, or exercise, Paw Match helps connect similar dogs based on key attributes.  
+[Paw Match](https://pawmatch.xyz/) is a mobile app designed for **dog owners** who want to find the perfect match for their dog. Whether it's for playdates, socialization, or exercise, Paw Match helps connect similar dogs based on key attributes.  
 
 ## 🐶 How It Works  
 
