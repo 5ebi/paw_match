@@ -61,7 +61,9 @@
           },
           "imageWidth": 200
         }
-      ]
+      ],
+      "expo-router",
+      "expo-sqlite"
     ],
     "extra": {
       "eas": {

@@ -1,5 +1,12 @@
+import type { PostgrestSingleResponse } from '@supabase/supabase-js';
 import { ExpoApiResponse } from '../../../ExpoApiResponse';
-import { prisma } from '../../../prismaClient';
+import { supabase } from '../../../supabaseClient';
+
+type Owner = {
+  id: string;
+  verification_code: string | null;
+  verified: boolean;
+};
 
 export async function GET(
   request: Request,
@@ -7,7 +14,7 @@ export async function GET(
   try {
     const url = new URL(request.url);
     const code = url.searchParams.get('code');
-    console.log('Received verification code:', code); // Debug log
+    console.log('Received verification code:', code);
 
     if (!code) {
       return ExpoApiResponse.json(
@@ -16,33 +23,39 @@ export async function GET(
       );
     }
 
-    const user = await prisma.owner.findFirst({
-      where: {
-        verificationCode: code,
-        verified: false,
-      },
-    });
+    const { data: user, error: findError }: PostgrestSingleResponse<Owner> =
+      await supabase
+        .from('owners')
+        .select('*')
+        .eq('verification_code', code)
+        .eq('verified', false)
+        .single();
 
-    console.log('Found user:', user ? 'Yes' : 'No'); // Debug log
-    console.log('User verification code in DB:', user?.verificationCode); // Debug log
+    console.log('Found user:', user ? 'Yes' : 'No');
+    console.log('User verification code in DB:', user?.verification_code);
 
-    if (!user) {
+    if (findError) {
       return ExpoApiResponse.json(
-        { error: 'Invalid or expired verification code' },
+        { error: 'Error finding user' },
         { status: 400 },
       );
     }
 
-    await prisma.owner.update({
-      where: {
-        id: user.id,
-      },
-      data: {
+    // Da wenn findError falsy ist, user immer definiert ist, entfällt die Prüfung auf !user
+
+    const { error: updateError } = await supabase
+      .from('owners')
+      .update({
         verified: true,
-        verificationCode: null,
-      },
-    });
-    console.log('User verified successfully'); // Debug log
+        verification_code: null,
+      })
+      .eq('id', user.id);
+
+    if (updateError) {
+      throw updateError;
+    }
+
+    console.log('User verified successfully');
 
     return ExpoApiResponse.json(
       { message: 'Email verified successfully! You can now log in.' },
