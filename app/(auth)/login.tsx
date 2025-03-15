@@ -1,5 +1,6 @@
 import { Stack, useRouter } from 'expo-router';
-import React, { useCallback, useState } from 'react';
+import * as React from 'react';
+import { useCallback, useState } from 'react';
 import {
   KeyboardAvoidingView,
   Platform,

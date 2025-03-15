@@ -1,16 +1,24 @@
 import crypto from 'node:crypto';
 import bcryptJs from 'bcryptjs';
 import { ExpoApiResponse } from '../../../ExpoApiResponse';
-import { prisma } from '../../../prismaClient';
+import { supabase } from '../../../supabaseClient';
 
 interface LoginBody {
   email: string;
   password: string;
 }
 
+interface Owner {
+  id: string;
+  name: string;
+  email: string;
+  password: string;
+  verified: boolean;
+}
+
 interface LoginSuccess {
   user: {
-    id: number;
+    id: string;
     username: string;
   };
   token: string;
@@ -29,12 +37,15 @@ export async function POST(
   try {
     const body: LoginBody = await request.json();
 
-    const user = await prisma.owner.findUnique({
-      where: {
-        email: body.email.toLowerCase(),
-      },
-    });
+    const { data: user, error } = await supabase
+      .from('owners')
+      .select('*')
+      .eq('email', body.email.toLowerCase())
+      .single<Owner>();
 
+    if (error) {
+      console.error('Supabase error:', error);
+    }
     if (!user) {
       return ExpoApiResponse.json(
         { error: 'Invalid credentials' },
@@ -42,7 +53,6 @@ export async function POST(
       );
     }
 
-    // Check if user is verified
     if (!user.verified) {
       return ExpoApiResponse.json(
         {
@@ -53,7 +63,6 @@ export async function POST(
       );
     }
 
-    // Check password
     const validPassword = await bcryptJs.compare(body.password, user.password);
     if (!validPassword) {
       return ExpoApiResponse.json(
@@ -62,17 +71,17 @@ export async function POST(
       );
     }
 
-    // Generate session token
     const token = crypto.randomBytes(32).toString('hex');
 
-    // Create session
-    await prisma.session.create({
-      data: {
-        token,
-        userId: user.id,
-        expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
-      },
+    const { error: sessionError } = await supabase.from('sessions').insert({
+      token,
+      user_id: user.id,
+      expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 Tage
     });
+
+    if (sessionError) {
+      throw sessionError;
+    }
 
     return ExpoApiResponse.json(
       {

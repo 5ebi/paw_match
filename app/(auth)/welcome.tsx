@@ -1,6 +1,5 @@
 // app/(auth)/welcome.tsx
 import { router } from 'expo-router';
-import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Button } from 'react-native-paper';
 import BackgroundSvg from '../../components/BackgroundSvg';

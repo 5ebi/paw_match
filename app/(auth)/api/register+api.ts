@@ -7,8 +7,9 @@ interface RegisterBody {
   name: string;
   email: string;
   password: string;
-  postalCode: string;
+  postal_code: string;
 }
+
 interface CustomError {
   message: string;
   name: string;
@@ -19,8 +20,8 @@ interface DatabaseUser {
   id: string;
   name: string;
   email: string;
-  postalCode: string;
-  verificationCode: string;
+  postal_code: string;
+  verification_code: string;
   verified: boolean;
 }
 
@@ -59,10 +60,10 @@ export async function POST(
       console.log('2. Received request body:', {
         name: body.name,
         email: body.email,
-        postalCode: body.postalCode,
+        postal_code: body.postal_code,
       });
-
-      if (!body.email || !body.password || !body.name || !body.postalCode) {
+      console.log('Body:', body);
+      if (!body.email || !body.password || !body.name || !body.postal_code) {
         console.error('3. Validation Error: Missing required fields');
         return ExpoApiResponse.json(
           { error: 'All fields are required' },
@@ -78,7 +79,7 @@ export async function POST(
     }
 
     const { data: existingUser } = await supabase
-      .from('Owner')
+      .from('owners')
       .select()
       .eq('email', body.email.toLowerCase())
       .single();
@@ -108,18 +109,18 @@ export async function POST(
       );
     }
 
-    const formattedPostalCode = `PLZ_${body.postalCode}`;
+    const formattedPostalCode = `PLZ_${body.postal_code}`;
 
     try {
       const { data: newUser, error: userError } = (await supabase
-        .from('Owner')
+        .from('owners')
         .insert([
           {
             name: body.name,
             email: body.email.toLowerCase(),
             password: passwordHash,
-            postalCode: formattedPostalCode,
-            verificationCode: verificationCode,
+            postal_code: formattedPostalCode,
+            verification_code: verificationCode,
             verified: false,
           },
         ])
@@ -135,11 +136,11 @@ export async function POST(
       const expiresAt = new Date();
       expiresAt.setDate(expiresAt.getDate() + 7);
 
-      const { error: sessionError } = await supabase.from('Session').insert([
+      const { error: sessionError } = await supabase.from('sessions').insert([
         {
           token: sessionToken,
-          userId: newUser.id,
-          expiresAt: expiresAt.toISOString(),
+          user_id: newUser.id,
+          expires_at: expiresAt.toISOString(),
         },
       ]);
 

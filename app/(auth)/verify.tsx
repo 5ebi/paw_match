@@ -1,5 +1,6 @@
 import { useRouter } from 'expo-router';
-import React, { useCallback, useState } from 'react';
+import * as React from 'react';
+import { useCallback, useState } from 'react';
 import { KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native';
 import { Button, Text, TextInput } from 'react-native-paper';
 import FullPageContainer from '../../components/FullPageContainer';
@@ -81,7 +82,6 @@ export default function Verify() {
   const [status, setStatus] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  // const { email } = useLocalSearchParams<{ email: string }>();
 
   const handleVerification = useCallback(
     async (code: string) => {
@@ -89,16 +89,11 @@ export default function Verify() {
         setIsLoading(true);
         setStatus(null);
 
-        // API-Anfrage direkt ausführen
         const response = await fetch(`/api/verify-email?code=${code}`);
         const data: VerifyResponse = await response.json();
 
         if (response.ok) {
-          // Mindestens 2 Sekunden Loading anzeigen
-          await new Promise((resolve) => {
-            setTimeout(resolve, 10);
-          });
-
+          await new Promise((resolve) => setTimeout(resolve, 1000));
           setStatus(data.message || 'Email verified successfully!');
           setTimeout(() => {
             router.push('/');
@@ -115,6 +110,7 @@ export default function Verify() {
     },
     [router],
   );
+
   return (
     <FullPageContainer>
       <KeyboardAvoidingView
@@ -123,8 +119,6 @@ export default function Verify() {
         keyboardVerticalOffset={20}
       >
         <View style={styles.container}>
-          {/* <BackButton /> */}
-
           <View style={styles.topSection}>
             <View style={styles.headerContainer}>
               <H1>Verify Your Email</H1>

@@ -29,7 +29,7 @@ const styles = StyleSheet.create({
 });
 
 export default function HomeLayout() {
-  const colorScheme = useColorScheme();
+  const colorScheme = useColorScheme(); // This is the correct way to get the color scheme
   const router = useRouter();
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
 

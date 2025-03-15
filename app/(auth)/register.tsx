@@ -1,5 +1,6 @@
 import { Stack, useRouter } from 'expo-router';
-import React, { useCallback, useState } from 'react';
+import * as React from 'react';
+import { useCallback, useState } from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
@@ -18,14 +19,14 @@ import { sessionStorage } from '../../util/sessionStorage';
 interface FormData {
   email: string;
   password: string;
-  postalCode: string;
+  postal_code: string;
   name: string;
 }
 
 interface FormErrors {
   email?: string;
   password?: string;
-  postalCode?: string;
+  postal_code?: string;
   name?: string;
   submit?: string;
 }
@@ -133,7 +134,7 @@ const Register: React.FC = () => {
   const [formData, setFormData] = useState<FormData>({
     email: '',
     password: '',
-    postalCode: '',
+    postal_code: '',
     name: '',
   });
   const [errors, setErrors] = useState<FormErrors>({});
@@ -159,12 +160,12 @@ const Register: React.FC = () => {
       newErrors.name = 'Name is required';
     }
 
-    if (!formData.postalCode) {
-      newErrors.postalCode = 'Postal code is required';
+    if (!formData.postal_code) {
+      newErrors.postal_code = 'Postal code is required';
     } else if (
-      !VALID_POSTAL_CODES.includes(formData.postalCode as ValidPostalCode)
+      !VALID_POSTAL_CODES.includes(formData.postal_code as ValidPostalCode)
     ) {
-      newErrors.postalCode = 'Please enter a valid Vienna postal code';
+      newErrors.postal_code = 'Please enter a valid Vienna postal code';
     }
 
     setErrors(newErrors);
@@ -285,9 +286,9 @@ const Register: React.FC = () => {
                 <TextInput
                   mode="outlined"
                   label="Postal Code"
-                  value={formData.postalCode}
+                  value={formData.postal_code}
                   onChangeText={(text) => {
-                    if (/^\d*$/.test(text)) handleChange('postalCode', text);
+                    if (/^\d*$/.test(text)) handleChange('postal_code', text);
                   }}
                   keyboardType="numeric"
                   maxLength={4}
@@ -296,11 +297,11 @@ const Register: React.FC = () => {
                   activeOutlineColor={colors.white}
                   style={styles.input}
                   theme={inputTheme}
-                  error={!!errors.postalCode}
+                  error={!!errors.postal_code}
                 />
-                {errors.postalCode && (
+                {errors.postal_code && (
                   <HelperText type="error" style={styles.helperText}>
-                    {errors.postalCode}
+                    {errors.postal_code}
                   </HelperText>
                 )}
               </View>

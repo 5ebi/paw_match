@@ -1,6 +1,5 @@
-import { ActivityLevel, DogSize } from '@prisma/client';
 import { ExpoApiResponse } from '../../../ExpoApiResponse';
-import { prisma } from '../../../prismaClient';
+import { supabase } from '../../../supabaseClient';
 
 const defaultPreferences = {
   prefersSmallDogs: true,
@@ -14,17 +13,17 @@ const defaultPreferences = {
 
 interface AddDogBody {
   name?: string;
-  size?: DogSize;
+  size?: string;
   birthDate?: string;
-  activityLevel?: ActivityLevel;
+  activityLevel?: string;
   image: string | null;
 }
 
 interface SuccessResponse {
   dog: {
     name: string;
-    size: DogSize;
-    activityLevel: ActivityLevel;
+    size: string;
+    activityLevel: string;
     image: string | null;
   };
   message: string;
@@ -52,7 +51,6 @@ export async function POST(
       );
     }
 
-    // Validate required fields
     if (!body.name || !body.size || !body.birthDate || !body.activityLevel) {
       return ExpoApiResponse.json(
         { error: 'Missing required fields' },
@@ -70,46 +68,59 @@ export async function POST(
 
     const sessionToken = authHeader.replace('Bearer ', '');
 
-    const session = await prisma.session.findUnique({
-      where: {
-        token: sessionToken,
-        expiresAt: {
-          gt: new Date(),
-        },
-      },
-      include: { user: true },
-    });
+    const { data: session, error: sessionError } = await supabase
+      .from('sessions')
+      .select('*, owners(*)')
+      .eq('token', sessionToken)
+      .gt('expires_at', new Date().toISOString())
+      .single();
 
-    if (!session) {
+    if (sessionError || !session) {
       return ExpoApiResponse.json(
         { error: 'Invalid or expired session' },
         { status: 401 },
       );
     }
 
-    const newDog = await prisma.dog.create({
-      data: {
-        name: body.name,
-        size: body.size,
-        birthDate: new Date(body.birthDate),
-        activityLevel: body.activityLevel,
-        image: body.image,
-        ownerId: session.user.id,
-        preferences: {
-          create: defaultPreferences,
+    const { data: newDog, error: dogError } = await supabase
+      .from('dogs')
+      .insert([
+        {
+          name: body.name,
+          size: body.size,
+          birth_date: body.birthDate,
+          activity_level: body.activityLevel,
+          image: body.image,
+          owner_id: session.owners.id,
         },
-      },
-      include: {
-        preferences: true,
-      },
-    });
+      ])
+      .select()
+      .single();
+
+    if (dogError || !newDog) {
+      return ExpoApiResponse.json(
+        { error: 'Failed to add dog' },
+        { status: 500 },
+      );
+    }
+
+    const { error: prefError } = await supabase
+      .from('dog_preferences')
+      .insert([{ dog_id: newDog.id, ...defaultPreferences }]);
+
+    if (prefError) {
+      return ExpoApiResponse.json(
+        { error: 'Failed to set preferences' },
+        { status: 500 },
+      );
+    }
 
     return ExpoApiResponse.json(
       {
         dog: {
           name: newDog.name,
           size: newDog.size,
-          activityLevel: newDog.activityLevel,
+          activityLevel: newDog.activity_level,
           image: newDog.image,
         },
         message: 'Dog added successfully',
