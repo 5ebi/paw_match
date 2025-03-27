@@ -1,6 +1,5 @@
-// app/api/hasDog/route.ts
 import { ExpoApiResponse } from '../../../ExpoApiResponse';
-import { prisma } from '../../../prismaClient';
+import { supabase } from '../../../supabaseClient';
 
 interface HasDogResponse {
   hasDog: boolean;
@@ -20,21 +19,37 @@ export async function GET(
     }
 
     const token = authHeader.replace('Bearer ', '');
-    const session = await prisma.session.findUnique({
-      where: { token },
-      include: { user: true },
-    });
 
-    if (!session || session.expiresAt < new Date()) {
+    // Session holen
+    const { data: session, error: sessionError } = await supabase
+      .from('sessions')
+      .select('*, owners(*)')
+      .eq('token', token)
+      .gt('expires_at', new Date().toISOString())
+      .single();
+
+    if (sessionError || !session || !session.owners) {
       return ExpoApiResponse.json(
         { hasDog: false, error: 'Invalid or expired session' },
         { status: 401 },
       );
     }
 
-    const dog = await prisma.dog.findFirst({
-      where: { ownerId: session.user.id },
-    });
+    // Hund für diesen Owner suchen
+    const { data: dog, error: dogError } = await supabase
+      .from('dogs')
+      .select('id')
+      .eq('owner_id', session.owners.id)
+      .limit(1)
+      .single();
+
+    if (dogError && dogError.code !== 'PGRST116') {
+      // PGRST116 = no rows found
+      return ExpoApiResponse.json(
+        { hasDog: false, error: 'Failed to query dog' },
+        { status: 500 },
+      );
+    }
 
     return ExpoApiResponse.json({ hasDog: !!dog }, { status: 200 });
   } catch (error) {

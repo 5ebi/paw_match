@@ -8,7 +8,6 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "migrate": "ley --require tsx/cjs",
-    "seed": "ts-node prisma/seed.ts",
     "start": "expo start",
     "test:email": "tsx scripts/test-email.ts",
     "web": "expo start --web"
@@ -20,7 +19,6 @@
     "@expo-google-fonts/montserrat": "^0.2.3",
     "@expo/server": "0.5.0",
     "@expo/vector-icons": "^14.0.4",
-    "@prisma/client": "6.2.1",
     "@react-native-async-storage/async-storage": "1.23.1",
     "@react-native-community/cli-server-api": "^15.1.2",
     "@react-native-community/datetimepicker": "8.2.0",
@@ -83,7 +81,6 @@
     "prettier": "^3.3.3",
     "prettier-plugin-embed": "^0.4.15",
     "prettier-plugin-sql": "^0.18.1",
-    "prisma": "6.2.1",
     "typescript": "^5.6.3"
   },
   "packageManager": "pnpm@9.12.3+sha512.cce0f9de9c5a7c95bef944169cc5dfe8741abfb145078c0d508b868056848a87c81e626246cb60967cbd7fd29a6c062ef73ff840d96b3c86c40ac92cf4a813ee",
@@ -93,8 +90,5 @@
         "listUnknownPackages": false
       }
     }
-  },
-  "prisma": {
-    "seed": "ts-node prisma/seed.ts"
   }
 }

@@ -5,9 +5,6 @@ const configureWebpack = async function (env, argv) {
   const config = await createExpoWebpackConfigAsync(
     {
       ...env,
-      babel: {
-        dangerouslyAddModulePathsToTranspile: ['@prisma/client'],
-      },
     },
     argv,
   );

@@ -2,7 +2,6 @@ import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { Image, ScrollView, StyleSheet, View } from 'react-native';
 import { Button, Text } from 'react-native-paper';
-import FullPageContainer from '../../components/FullPageContainer';
 import H1 from '../../components/H1';
 import H2 from '../../components/H2';
 import Textt from '../../components/Textt';
@@ -11,7 +10,7 @@ import { colors } from '../../constants/colors';
 import { sessionStorage } from '../../util/sessionStorage';
 
 interface Dog {
-  id: string;
+  id: number;
   name: string;
   image: string;
   size: string;

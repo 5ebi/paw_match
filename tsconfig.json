@@ -16,7 +16,7 @@
     "**/*.mjs",
     ".expo/types/**/*.ts",
     "expo-env.d.ts",
-    "prismaClient.ts",
+
     "./"
   ],
   "exclude": ["node_modules"]

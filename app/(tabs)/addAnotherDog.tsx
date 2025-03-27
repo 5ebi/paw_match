@@ -1,4 +1,3 @@
-import { ActivityLevel, DogSize } from '@prisma/client';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import SegmentedControl from '@react-native-segmented-control/segmented-control';
 import * as ImagePicker from 'expo-image-picker';
@@ -23,6 +22,18 @@ const inputTheme = {
     onSurface: colors.white,
   },
 };
+
+export enum DogSize {
+  SMALL = 'small',
+  MEDIUM = 'medium',
+  LARGE = 'large',
+}
+
+export enum ActivityLevel {
+  LOW = 'low',
+  MODERATE = 'moderate',
+  HIGH = 'high',
+}
 
 interface DogFormData {
   name: string;

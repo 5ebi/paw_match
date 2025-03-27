@@ -1,5 +1,5 @@
 import { ExpoApiResponse } from '../../../ExpoApiResponse';
-import { prisma } from '../../../prismaClient';
+import { supabase } from '../../../supabaseClient';
 
 export async function POST(
   request: Request,
@@ -15,11 +15,17 @@ export async function POST(
 
     const sessionToken = authHeader.replace('Bearer ', '');
 
-    await prisma.session.delete({
-      where: {
-        token: sessionToken,
-      },
-    });
+    const { error } = await supabase
+      .from('sessions')
+      .delete()
+      .eq('token', sessionToken);
+
+    if (error) {
+      return ExpoApiResponse.json(
+        { error: 'Failed to logout' },
+        { status: 500 },
+      );
+    }
 
     return ExpoApiResponse.json(
       { message: 'Logged out successfully' },
