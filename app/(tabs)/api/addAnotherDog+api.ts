@@ -38,7 +38,42 @@ type AddDogResponse = SuccessResponse | ErrorResponse;
 export async function POST(
   request: Request,
 ): Promise<ExpoApiResponse<AddDogResponse>> {
-  console.log('API Route hit: /api/addFirstDog');
+  console.log('🐾 API Route hit: /api/addAnotherDog');
+
+  let body: AddDogBody;
+  try {
+    body = await request.json();
+    console.log('🐾 Parsed body:', body); // 🐾 DEBUG LOGS
+  } catch (err) {
+    console.error('🐾 Failed to parse body:', err); // 🐾 DEBUG LOGS
+    return ExpoApiResponse.json(
+      { error: 'Invalid request body' },
+      { status: 400 },
+    );
+  }
+
+  const authHeader = request.headers.get('authorization');
+  console.log('🐾 Auth header:', authHeader); // 🐾 DEBUG LOGS
+
+  if (!authHeader) {
+    return ExpoApiResponse.json(
+      { error: 'Not authenticated' },
+      { status: 401 },
+    );
+  }
+
+  const sessionToken = authHeader.replace('Bearer ', '');
+  console.log('🐾 Session token:', sessionToken); // 🐾 DEBUG LOGS
+
+  const { data: session, error: sessionError } = await supabase
+    .from('sessions')
+    .select('*, owners(*)')
+    .eq('token', sessionToken)
+    .gt('expires_at', new Date().toISOString())
+    .single();
+
+  console.log('🐾 Session:', session); // 🐾 DEBUG LOGS
+  console.log('🐾 Session error:', sessionError); // 🐾 DEBUG LOGS
 
   try {
     let body: AddDogBody;

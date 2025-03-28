@@ -96,7 +96,7 @@ export default function Verify() {
           await new Promise((resolve) => setTimeout(resolve, 1000));
           setStatus(data.message || 'Email verified successfully!');
           setTimeout(() => {
-            router.push('/');
+            router.push('/addAnotherDog');
           }, 2000);
         } else {
           setStatus(data.error || 'Verification failed');

@@ -159,7 +159,7 @@ const styles = StyleSheet.create({
   },
 });
 
-export default function AddFirstDog() {
+export default function AddAnotherDog() {
   const [formData, setFormData] = useState<DogFormData>({
     name: '',
     size: DogSize.MEDIUM,
@@ -310,7 +310,7 @@ export default function AddFirstDog() {
         birthDate: formData.birthDate?.toISOString(),
       };
 
-      const response = await fetch('/api/addFirstDog', {
+      const response = await fetch('/api/addAnotherDog', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
