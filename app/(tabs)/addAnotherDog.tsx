@@ -1,9 +1,11 @@
+import 'react-datepicker/dist/react-datepicker.css';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import SegmentedControl from '@react-native-segmented-control/segmented-control';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import React, { useCallback, useState } from 'react';
-import { Image, ScrollView, StyleSheet, View } from 'react-native';
+import DatePicker from 'react-datepicker';
+import { Image, Platform, ScrollView, StyleSheet, View } from 'react-native';
 import {
   Button,
   HelperText,
@@ -24,15 +26,15 @@ const inputTheme = {
 };
 
 export enum DogSize {
-  SMALL = 'small',
-  MEDIUM = 'medium',
-  LARGE = 'large',
+  SMALL = 'SMALL',
+  MEDIUM = 'MEDIUM',
+  LARGE = 'LARGE',
 }
 
 export enum ActivityLevel {
-  LOW = 'low',
-  MODERATE = 'moderate',
-  HIGH = 'high',
+  LOW = 'LOW',
+  MODERATE = 'MODERATE',
+  HIGH = 'HIGH',
 }
 
 interface DogFormData {
@@ -304,12 +306,17 @@ export default function AddAnotherDog() {
 
     try {
       const session = await getSession();
-
+      console.log('Session:', session);
       const dataToSubmit = {
-        ...formData,
-        birthDate: formData.birthDate?.toISOString(),
+        name: formData.name,
+        size: formData.size,
+        birth_date: formData.birthDate
+          ? formData.birthDate.toISOString()
+          : null,
+        activity_level: formData.activityLevel,
+        image: formData.image,
       };
-
+      console.log('Sending data:', dataToSubmit);
       const response = await fetch('/api/addAnotherDog', {
         method: 'POST',
         headers: {
@@ -318,11 +325,13 @@ export default function AddAnotherDog() {
         },
         body: JSON.stringify(dataToSubmit),
       });
-
+      const responseText = await response.text();
+      console.log('API response:', responseText);
       if (!response.ok) throw new Error(await response.text());
 
       router.push('/allDone');
     } catch (err) {
+      console.error('Error during submission:', err);
       setErrors((prev) => ({
         ...prev,
         submit: 'Error adding dog',
@@ -472,42 +481,62 @@ export default function AddAnotherDog() {
               </Text>
             </Button>
 
-            <Portal>
-              <Modal
-                visible={showDatePicker}
-                onDismiss={handleCancelDate}
-                contentContainerStyle={styles.modalContent}
-              >
-                <View style={styles.datePickerContainer}>
-                  <DateTimePicker
-                    value={tempDate || new Date()}
-                    mode="date"
-                    display="spinner"
-                    onChange={handleDateChange}
-                    maximumDate={new Date()}
-                    textColor={colors.white}
-                    themeVariant="dark"
-                    locale="en-US"
-                  />
-                </View>
-                <View style={styles.modalButtons}>
-                  <Button
-                    mode="outlined"
-                    onPress={handleCancelDate}
-                    style={styles.modalButton}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    mode="contained"
-                    onPress={handleConfirmDate}
-                    style={styles.modalButton2}
-                  >
-                    Confirm
-                  </Button>
-                </View>
-              </Modal>
-            </Portal>
+            {Platform.OS === 'web' ? (
+              <View style={{ marginTop: 10 }}>
+                <DatePicker
+                  selected={formData.birthDate || new Date()}
+                  onChange={(date) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      birthDate: date,
+                    }))
+                  }
+                  maxDate={new Date()}
+                  dateFormat="yyyy-MM-dd"
+                  showMonthDropdown
+                  showYearDropdown
+                  dropdownMode="select"
+                  inline
+                />
+              </View>
+            ) : (
+              <Portal>
+                <Modal
+                  visible={showDatePicker}
+                  onDismiss={handleCancelDate}
+                  contentContainerStyle={styles.modalContent}
+                >
+                  <View style={styles.datePickerContainer}>
+                    <DateTimePicker
+                      value={tempDate || new Date()}
+                      mode="date"
+                      display="spinner"
+                      onChange={handleDateChange}
+                      maximumDate={new Date()}
+                      textColor={colors.white}
+                      themeVariant="dark"
+                      locale="en-US"
+                    />
+                  </View>
+                  <View style={styles.modalButtons}>
+                    <Button
+                      mode="outlined"
+                      onPress={handleCancelDate}
+                      style={styles.modalButton}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      mode="contained"
+                      onPress={handleConfirmDate}
+                      style={styles.modalButton2}
+                    >
+                      Confirm
+                    </Button>
+                  </View>
+                </Modal>
+              </Portal>
+            )}
 
             {errors.birthDate && (
               <HelperText type="error" style={styles.helperText}>
