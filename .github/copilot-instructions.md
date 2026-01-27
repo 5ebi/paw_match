@@ -43,6 +43,24 @@
 - **Add a new screen:** Place a `.tsx` file in the relevant `app/(feature)/` folder and add a route in the router stack if needed.
 - **Use session:** Import from `util/sessionStorage.ts`.
 
+## Deployment & Hosting
+
+### iOS/Android (EAS Update – OTA Updates)
+
+- **Login:** `pnpm dlx eas-cli@latest whoami` (login if needed: `pnpm dlx eas-cli@latest login`)
+- **Check project:** `pnpm dlx eas-cli@latest project:info` (should show ID: `a69e0873-0c47-4d59-a8cd-ed0cc0ac9010`)
+- **Push OTA update:** `pnpm dlx eas-cli@latest update --branch production --message "feat: description"`
+  - App instances on the `production` channel pull updates automatically
+  - Runtime version is pinned to `"1.0.0"` in `app.json` (required for bare workflow)
+- **For native builds (Stores):** `pnpm dlx eas-cli@latest build --platform ios|android|all`
+
+### Web (EAS Hosting)
+
+- **Export for web:** `npx expo export --platform web` → creates `dist/` folder
+- **Preview deploy:** `pnpm dlx eas-cli@latest deploy` → preview URL (`.expo.app`)
+- **Production deploy:** `pnpm dlx eas-cli@latest deploy --prod`
+- **Auto-deploy on push:** Create `.eas/workflows/deploy-web.yml` with trigger on `main` branch
+
 ## References
 
 - Main entry: `app/_layout.tsx`
