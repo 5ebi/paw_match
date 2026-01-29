@@ -19,9 +19,12 @@
 
 - **Start app:** `pnpm start` or `npm run start` (runs Expo)
 - **Platform builds:** `pnpm android`, `pnpm ios`, `pnpm web`
-- **Migrations:** `pnpm migrate` (uses `ley`)
-- **Test email sending:** `pnpm test:email`
+- **Test email sending:** `pnpm test:email` (sends test emails via Resend)
+- **Type checking:** `pnpm tsc`
+- **Linting:** `pnpm eslint . --max-warnings 0` (custom ESLint config, no PostgreSQL tools)
 - **Backend scripts:** See `scripts/` for utilities
+
+**Note:** Database migrations are managed by Supabase directly; no local migration tool is used.
 
 ## Project Conventions
 
@@ -33,15 +36,40 @@
 
 ## Integration Points
 
-- **Supabase**: All data access (users, dogs, sessions, matches) is via Supabase client (`supabaseClient.ts`).
-- **Cloudinary**: Used for image uploads (see dependencies, config in `cloudinaryConfig.ts`).
-- **Email**: Sending via Resend SDK (see `util/emails.ts` for verification emails).
+- **Supabase**: All data access (users, dogs, sessions, matches) is via Supabase client (`supabaseClient.ts`). NO local PostgreSQL.
+- **Cloudinary**: Used for image uploads (config in `cloudinaryConfig.ts`).
+- **Email**: Sending via Resend SDK. Templates in `util/emails.ts` (HTML-based with 4-color design).
+- **GitHub Actions**: Simple CI workflow (type checking + linting). No database setup needed. ESLint uses custom flat config (no @ts-safeql or libpg-query).
 
 ## Examples
 
 - **Add a new API route:** Place a `*+api.ts` file in the appropriate `app/(feature)/api/` folder and export async `GET`/`POST` functions.
 - **Add a new screen:** Place a `.tsx` file in the relevant `app/(feature)/` folder and add a route in the router stack if needed.
 - **Use session:** Import from `util/sessionStorage.ts`.
+
+## Design & Colors
+
+The app uses a **clean, simple 4-color palette** for consistency:
+- **Primary:** `#515a47` (green) - main brand color, buttons, headers
+- **Accent:** `#d7be82` (warm yellow) - highlights, secondary elements
+- **Dark:** `#400406` (dark brown) - text, headings
+- **Light:** `#fdecde` (warm white) - backgrounds, cards
+
+**Fonts:** 
+- Logo uses **Modak** (`@expo-google-fonts/modak`)
+- UI uses system fonts and Montserrat
+
+**Email Templates:** Located in `util/emails.ts`, uses HTML tables with inline styles. Logo styling: yellow (`#e9b44c`) on green header, white text on green code background.
+
+## Removed Dependencies & Tech Debt
+
+The following PostgreSQL-specific tools were removed to simplify the codebase:
+- `libpg-query`, `@ts-safeql/eslint-plugin` (SQL parsing for local PostgreSQL)
+- `@upleveled/ley` (local migration tool)
+- `postgres`, `prettier-plugin-sql` (PostgreSQL-specific)
+- Custom `eslint-config-upleveled` → replaced with own flat ESLint config
+
+This reduces CI complexity and eliminates native module compilation errors in GitHub Actions.
 
 ## Deployment & Hosting
 
