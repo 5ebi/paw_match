@@ -67,7 +67,7 @@ const emailTemplate = (content: string) => `
 
 export const sendVerificationEmail = async (email: string, code: string) => {
   const content = `
-    <h2 style="margin: 0 0 20px; color: ${colors.text}; font-size: 28px; font-weight: 600;">
+    <h2 style="margin: 0 0 20px; color: ${colors.background}; font-size: 28px; font-weight: 600;">
       Welcome to PawMatch! 🐾
     </h2>
     <p style="margin: 0 0 24px; color: ${colors.textLight}; font-size: 16px; line-height: 1.6;">
