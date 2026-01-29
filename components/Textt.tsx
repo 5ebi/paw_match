@@ -1,6 +1,5 @@
 // Textt.tsx
 import {
-  Montserrat_600SemiBold,
   Montserrat_700Bold,
   useFonts,
 } from '@expo-google-fonts/montserrat';

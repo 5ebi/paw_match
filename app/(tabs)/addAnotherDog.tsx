@@ -234,7 +234,7 @@ export default function AddAnotherDog() {
           setErrors((prev) => ({ ...prev, submit: 'Upload failed' }));
         }
       }
-    } catch (error) {
+    } catch {
       setErrors((prev) => ({ ...prev, submit: 'Upload error' }));
     }
   };

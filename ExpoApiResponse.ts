@@ -1,5 +1,6 @@
 // ExpoApiResponse.ts
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export class ExpoApiResponse<Body = unknown> extends Response {
   constructor(body?: BodyInit | null, init: ResponseInit = {}) {
     super(body, init);
