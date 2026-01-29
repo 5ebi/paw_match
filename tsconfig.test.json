@@ -14,6 +14,5 @@
     "esm": true,
     "experimentalSpecifierResolution": "node"
   },
-  "include": ["mailer.ts"],
   "exclude": ["node_modules"]
 }

@@ -1,9 +1,12 @@
 import type { PostgrestSingleResponse } from '@supabase/supabase-js';
 import { ExpoApiResponse } from '../../../ExpoApiResponse';
 import { supabase } from '../../../supabaseClient';
+import { sendWelcomeEmail } from '../../../util/emails';
 
 type Owner = {
   id: string;
+  name: string;
+  email: string;
   verification_code: string | null;
   verified: boolean;
 };
@@ -53,6 +56,15 @@ export async function GET(
 
     if (updateError) {
       throw updateError;
+    }
+
+    // Send welcome email
+    try {
+      await sendWelcomeEmail(user.name, user.email);
+      console.log('Welcome email sent successfully');
+    } catch (emailError) {
+      console.error('Welcome email error:', emailError);
+      // Don't throw - verification was successful, email is bonus
     }
 
     console.log('User verified successfully');

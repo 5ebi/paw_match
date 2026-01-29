@@ -35,7 +35,7 @@
 
 - **Supabase**: All data access (users, dogs, sessions, matches) is via Supabase client (`supabaseClient.ts`).
 - **Cloudinary**: Used for image uploads (see dependencies, config in `cloudinaryConfig.ts`).
-- **Email**: Sending via `nodemailer` (see `util/emails.ts` and `scripts/test-email.ts`).
+- **Email**: Sending via Resend SDK (see `util/emails.ts` for verification emails).
 
 ## Examples
 
