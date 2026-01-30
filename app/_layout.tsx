@@ -1,5 +1,6 @@
 import Constants from 'expo-constants';
-import { Stack, useRouter } from 'expo-router';
+import { Modak_400Regular, useFonts } from '@expo-google-fonts/modak';
+import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
 import {
@@ -31,7 +32,11 @@ const styles = StyleSheet.create({
 export default function HomeLayout() {
   const colorScheme = useColorScheme(); // This is the correct way to get the color scheme
   const router = useRouter();
+  const segments = useSegments();
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
+  const [fontsLoaded] = useFonts({
+    Modak_400Regular,
+  });
 
   // Session beim App-Start prüfen
   useEffect(() => {
@@ -52,24 +57,32 @@ export default function HomeLayout() {
 
   // Routing basierend auf Login-Status
   useEffect(() => {
-    if (isLoggedIn === true) {
+    const inAuthGroup = segments[0] === '(auth)';
+    const inTabsGroup = segments[0] === '(tabs)';
+
+    if (isLoggedIn === true && inAuthGroup) {
       router.replace('/(tabs)');
-    } else if (isLoggedIn === false) {
+      return;
+    }
+
+    if (isLoggedIn === false && inTabsGroup) {
       router.replace('/(auth)/welcome');
     }
-  }, [isLoggedIn, router]);
+  }, [isLoggedIn, router, segments]);
 
   return (
     <PaperProvider theme={colorScheme === 'dark' ? darkTheme : lightTheme}>
       <SafeAreaView style={styles.container}>
         <StatusBar style="light" />
-        <View style={styles.view}>
-          <Stack>
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-            <Stack.Screen name="(files)" options={{ headerShown: false }} />
-          </Stack>
-        </View>
+        {fontsLoaded && (
+          <View style={styles.view}>
+            <Stack>
+              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+              <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+              <Stack.Screen name="(files)" options={{ headerShown: false }} />
+            </Stack>
+          </View>
+        )}
       </SafeAreaView>
     </PaperProvider>
   );

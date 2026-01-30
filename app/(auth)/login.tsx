@@ -1,6 +1,6 @@
-import { Stack, useRouter } from 'expo-router';
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import * as React from 'react';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
@@ -16,6 +16,17 @@ import { colors } from '../../constants/colors';
 import { sessionStorage } from '../../util/sessionStorage';
 
 const ELEMENT_WIDTH = 330;
+
+const errorBannerShadow =
+  Platform.OS === 'web'
+    ? ({ boxShadow: '0px 6px 10px rgba(0, 0, 0, 0.12)' } as const)
+    : {
+        shadowColor: colors.black,
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.12,
+        shadowRadius: 10,
+        elevation: 3,
+      };
 
 const styles = StyleSheet.create({
   container: {
@@ -46,15 +57,57 @@ const styles = StyleSheet.create({
     marginBottom: 6,
     width: ELEMENT_WIDTH,
   },
-  errorText: {
-    color: 'red',
-    marginTop: 10,
+  errorBanner: {
+    marginTop: 14,
     width: ELEMENT_WIDTH,
-    textAlign: 'center',
+    backgroundColor: colors.white,
+    borderLeftColor: colors.brown,
+    borderLeftWidth: 4,
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    ...errorBannerShadow,
+  },
+  errorBannerText: {
+    color: colors.black2,
+    textAlign: 'left',
+    fontSize: 14,
+    fontWeight: '600',
+    lineHeight: 20,
+  },
+  successBanner: {
+    marginTop: 14,
+    width: ELEMENT_WIDTH,
+    backgroundColor: colors.white,
+    borderLeftColor: colors.green,
+    borderLeftWidth: 4,
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    ...errorBannerShadow,
+  },
+  successBannerText: {
+    color: colors.green,
+    textAlign: 'left',
+    fontSize: 14,
+    fontWeight: '600',
+    lineHeight: 20,
   },
   helperText: {
     color: colors.white2,
     width: ELEMENT_WIDTH,
+  },
+  forgotPasswordContainer: {
+    width: ELEMENT_WIDTH,
+    alignItems: 'flex-end',
+    marginTop: 8,
+    marginBottom: 30,
+  },
+  forgotPasswordText: {
+    color: colors.yellow,
+    fontSize: 13,
+    fontWeight: '500',
+    textDecorationLine: 'underline',
   },
   buttonsContainer: {
     marginTop: 'auto',
@@ -77,8 +130,12 @@ const inputTheme = {
 };
 
 const Login: React.FC = () => {
+  const { email: paramEmail, reset } = useLocalSearchParams<{
+    email?: string;
+    reset?: string;
+  }>();
   const [formData, setFormData] = useState({
-    email: '',
+    email: paramEmail || '',
     password: '',
   });
   const [errors, setErrors] = useState<{
@@ -88,6 +145,17 @@ const Login: React.FC = () => {
   }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
+  const passwordInputRef = useRef<any>(null);
+  const showResetSuccess = reset === 'success';
+
+  // Focus password field if email is prefilled
+  useEffect(() => {
+    if (paramEmail && passwordInputRef.current) {
+      setTimeout(() => {
+        passwordInputRef.current?.focus();
+      }, 300);
+    }
+  }, [paramEmail]);
 
   const handleChange = useCallback(
     (field: 'email' | 'password', value: string) => {
@@ -149,7 +217,10 @@ const Login: React.FC = () => {
           submit: data.error || 'Login failed',
         }));
         if (data.needsVerification) {
-          router.push('/verify');
+          router.push({
+            pathname: '/verify',
+            params: { reason: 'existing' },
+          });
         }
       }
     } catch {
@@ -161,6 +232,7 @@ const Login: React.FC = () => {
       setIsSubmitting(false);
     }
   };
+
 
   return (
     <>
@@ -203,6 +275,7 @@ const Login: React.FC = () => {
 
               <View style={styles.inputGroup}>
                 <TextInput
+                  ref={passwordInputRef}
                   mode="outlined"
                   label="Password"
                   value={formData.password}
@@ -222,8 +295,34 @@ const Login: React.FC = () => {
                 )}
               </View>
 
+              <View style={styles.forgotPasswordContainer}>
+                <Text
+                  style={styles.forgotPasswordText}
+                  onPress={() =>
+                    router.push({
+                      pathname: '/forgotPassword',
+                      params: formData.email
+                        ? { email: formData.email }
+                        : undefined,
+                    })
+                  }
+                >
+                  Forgot password?
+                </Text>
+              </View>
+
+              {showResetSuccess && (
+                <View style={styles.successBanner}>
+                  <Text style={styles.successBannerText}>
+                    Password updated. Please log in with your new password.
+                  </Text>
+                </View>
+              )}
+
               {errors.submit && (
-                <Text style={styles.errorText}>{errors.submit}</Text>
+                <View style={styles.errorBanner}>
+                  <Text style={styles.errorBannerText}>{errors.submit}</Text>
+                </View>
               )}
             </View>
           </View>
@@ -240,6 +339,7 @@ const Login: React.FC = () => {
           </View>
         </KeyboardAvoidingView>
       </FullPageContainer>
+
     </>
   );
 };

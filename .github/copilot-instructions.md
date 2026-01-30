@@ -37,6 +37,10 @@
 ## Integration Points
 
 - **Supabase**: All data access (users, dogs, sessions, matches) is via Supabase client (`supabaseClient.ts`). NO local PostgreSQL.
+  - **IMPORTANT:** `supabaseClient.ts` must use environment variables (`process.env.NEXT_PUBLIC_SUPABASE_URL`, `process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY`, `process.env.SUPABASE_SERVICE_ROLE_KEY`) instead of hardcoded values.
+  - Environment variables are defined in `.env.development` (dev) and `.env.production` (prod).
+  - **Dev server restart required** after changing environment variables in Expo (`pnpm start` must be restarted).
+  - **Common issue:** If login fails with "invalid credentials" but credentials are correct, check that Supabase URL/keys in `supabaseClient.ts` match the `.env` file (not pointing to wrong database instance).
 - **Cloudinary**: Used for image uploads (config in `cloudinaryConfig.ts`).
 - **Email**: Sending via Resend SDK. Templates in `util/emails.ts` (HTML-based with 4-color design).
 - **GitHub Actions**: Simple CI workflow (type checking + linting). No database setup needed. ESLint uses custom flat config (no @ts-safeql or libpg-query).
@@ -55,7 +59,7 @@ The app uses a **clean, simple 4-color palette** for consistency:
 - **Dark:** `#400406` (dark brown) - text, headings
 - **Light:** `#fdecde` (warm white) - backgrounds, cards
 
-**Fonts:** 
+**Fonts:**
 - Logo uses **Modak** (`@expo-google-fonts/modak`)
 - UI uses system fonts and Montserrat
 
@@ -96,6 +100,25 @@ This reduces CI complexity and eliminates native module compilation errors in Gi
 - Session: `util/sessionStorage.ts`, Supabase `sessions` table
 - UI: `components/`, `constants/colors.tsx`, `constants/theme.ts`
 - API conventions: `app/**/api/*+api.ts`, `ExpoApiResponse.ts`
+
+## AI Agent Best Practices
+
+**Interactive Process Handling:**
+- ❌ **Never run interactive processes in background** (e.g., `pnpm start`). AI cannot respond to terminal prompts, causing infinite loops waiting for user input.
+- ✅ **Instead:** Verify code with non-interactive commands only:
+  - `pnpm tsc` (type checking)
+  - `pnpm eslint . --max-warnings 0` (linting)
+  - Fix any errors found
+  - **Stop there.** The user will run `pnpm start` in their own terminal for interactive testing.
+- **Pattern:** Code verification → Fix errors → Stop. User handles interactive parts.
+
+**Debugging Authentication Issues:**
+- When investigating login/auth failures, check these in order:
+  1. Verify Supabase client configuration uses environment variables (not hardcoded)
+  2. Confirm `.env.development` values match the Supabase project being used
+  3. Check if dev server needs restart to pick up environment variable changes
+  4. Use console.log statements in API routes (they appear in the terminal running `pnpm start`)
+  5. Create debug scripts in `scripts/` folder to test database queries directly
 
 ---
 

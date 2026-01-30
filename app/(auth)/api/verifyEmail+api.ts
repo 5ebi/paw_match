@@ -1,6 +1,5 @@
 import { ExpoApiResponse } from '../../../ExpoApiResponse';
 import { supabaseAdmin } from '../../../supabaseClient';
-import { sendWelcomeEmail } from '../../../util/emails';
 
 type Owner = {
   id: string;
@@ -25,7 +24,6 @@ export async function GET(
       );
     }
 
-    // Trim whitespace from code
     const trimmedCode = code.trim();
     console.log('Trimmed verification code:', trimmedCode);
 
@@ -37,7 +35,6 @@ export async function GET(
       .maybeSingle();
 
     console.log('Found user:', user ? 'Yes' : 'No');
-    console.log('User verification code in DB:', user?.verification_code);
 
     if (findError) {
       console.error('Error finding user:', findError);
@@ -66,19 +63,10 @@ export async function GET(
       throw updateError;
     }
 
-    // Send welcome email
-    try {
-      await sendWelcomeEmail(user.name, user.email);
-      console.log('Welcome email sent successfully');
-    } catch (emailError) {
-      console.error('Welcome email error:', emailError);
-      // Don't throw - verification was successful, email is bonus
-    }
-
-    console.log('User verified successfully');
+    console.log('Email verified successfully');
 
     return ExpoApiResponse.json(
-      { message: 'Email verified successfully! You can now log in.' },
+      { message: 'Email verified successfully!' },
       { status: 200 },
     );
   } catch (error) {

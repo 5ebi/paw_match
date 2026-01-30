@@ -1,6 +1,6 @@
 import bcryptJs from 'bcryptjs';
 import { ExpoApiResponse } from '../../../ExpoApiResponse';
-import { supabase } from '../../../supabaseClient';
+import { supabaseAdmin } from '../../../supabaseClient';
 import { sendVerificationEmail } from '../../../util/emails';
 
 interface RegisterBody {
@@ -36,6 +36,8 @@ interface SuccessResponse {
 interface ErrorResponse {
   error: string;
   details?: Record<string, unknown>;
+  needsVerification?: boolean;
+  redirectToLogin?: boolean;
 }
 
 type RegisterResponse = SuccessResponse | ErrorResponse;
@@ -78,7 +80,7 @@ export async function POST(
       );
     }
 
-    const { data: existingUser } = await supabase
+    const { data: existingUser } = await supabaseAdmin
       .from('owners')
       .select()
       .eq('email', body.email.toLowerCase())
@@ -88,8 +90,62 @@ export async function POST(
 
     if (existingUser) {
       console.log('4a. User already exists');
+      console.log('4a-debug. Existing user data:', {
+        id: existingUser.id,
+        email: existingUser.email,
+        verified: existingUser.verified,
+        verification_code: existingUser.verification_code,
+      });
+
+      // Check if user is not verified
+      if (!existingUser.verified) {
+        console.log('4b. User exists but not verified, resending verification');
+
+        // Generate new verification code
+        const newVerificationCode = generateVerificationCode();
+        console.log('4b-debug. Generated new code:', newVerificationCode);
+
+        // Update verification code in database
+        const { data: updateData, error: updateError } = await supabaseAdmin
+          .from('owners')
+          .update({ verification_code: newVerificationCode })
+          .eq('id', existingUser.id)
+          .select();
+
+        console.log('4b-debug. Update response:', { data: updateData, error: updateError });
+
+        if (updateError) {
+          console.error('4c. Error updating verification code:', updateError);
+          return ExpoApiResponse.json(
+            { error: 'Error updating verification code' },
+            { status: 500 },
+          );
+        }
+
+        // Resend verification email with new code
+        try {
+          await sendVerificationEmail(body.email, newVerificationCode);
+          console.log('4d. Verification email resent successfully');
+        } catch (emailError: any) {
+          console.error('4e. Email Error:', emailError);
+          // Continue even if email fails
+        }
+
+        return ExpoApiResponse.json(
+          {
+            error: 'Account already exists but is not verified. A new verification code has been sent to your email. Please verify your account.',
+            needsVerification: true,
+          },
+          { status: 400 },
+        );
+      }
+
+      // User exists and is verified - redirect to login
       return ExpoApiResponse.json(
-        { error: 'Email already taken' },
+        {
+          error: 'This email is already registered. Please log in instead.',
+          redirectToLogin: true
+        },
         { status: 400 },
       );
     }
@@ -112,7 +168,7 @@ export async function POST(
     const formattedPostalCode = `PLZ_${body.postal_code}`;
 
     try {
-      const { data: newUser, error: userError } = (await supabase
+      const { data: newUser, error: userError } = (await supabaseAdmin
         .from('owners')
         .insert([
           {
@@ -136,7 +192,7 @@ export async function POST(
       const expiresAt = new Date();
       expiresAt.setDate(expiresAt.getDate() + 7);
 
-      const { error: sessionError } = await supabase.from('sessions').insert([
+      const { error: sessionError } = await supabaseAdmin.from('sessions').insert([
         {
           token: sessionToken,
           user_id: newUser.id,

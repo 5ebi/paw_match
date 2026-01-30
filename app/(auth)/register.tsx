@@ -38,9 +38,22 @@ interface ApiResponse {
   message: string;
   token: string;
   error?: string;
+  redirectToLogin?: boolean;
+  needsVerification?: boolean;
 }
 
 const ELEMENT_WIDTH = 330;
+
+const errorBannerShadow =
+  Platform.OS === 'web'
+    ? ({ boxShadow: '0px 6px 10px rgba(0, 0, 0, 0.12)' } as const)
+    : {
+        shadowColor: colors.black,
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.12,
+        shadowRadius: 10,
+        elevation: 3,
+      };
 
 const styles = StyleSheet.create({
   container: {
@@ -71,11 +84,23 @@ const styles = StyleSheet.create({
     marginBottom: 6,
     width: ELEMENT_WIDTH, // Gleiche Breite wie Inputs
   },
-  errorText: {
-    color: 'red',
-    marginTop: 10,
+  errorBanner: {
+    marginTop: 14,
     width: ELEMENT_WIDTH,
-    textAlign: 'center',
+    backgroundColor: colors.white,
+    borderLeftColor: colors.brown,
+    borderLeftWidth: 4,
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    ...errorBannerShadow,
+  },
+  errorBannerText: {
+    color: colors.black2,
+    textAlign: 'left',
+    fontSize: 14,
+    fontWeight: '600',
+    lineHeight: 20,
   },
   helperText: {
     color: colors.white2,
@@ -208,6 +233,17 @@ const Register: React.FC = () => {
         await sessionStorage.setSession(data.token);
         router.push('/verify');
       } else {
+        if (data.needsVerification) {
+          router.push({
+            pathname: '/verify',
+            params: { reason: 'existing' },
+          });
+          return;
+        }
+        if (data.redirectToLogin) {
+          router.push('/login');
+          return;
+        }
         setErrors((prev) => ({
           ...prev,
           submit: data.error || 'Registration failed',
@@ -223,6 +259,7 @@ const Register: React.FC = () => {
       setIsSubmitting(false);
     }
   };
+
   return (
     <>
       <Stack.Screen options={{ headerShown: false }} />
@@ -328,7 +365,9 @@ const Register: React.FC = () => {
               </View>
 
               {errors.submit && (
-                <Text style={styles.errorText}>{errors.submit}</Text>
+                <View style={styles.errorBanner}>
+                  <Text style={styles.errorBannerText}>{errors.submit}</Text>
+                </View>
               )}
             </View>
           </View>
@@ -344,6 +383,7 @@ const Register: React.FC = () => {
           </View>
         </KeyboardAvoidingView>
       </FullPageContainer>
+
     </>
   );
 };

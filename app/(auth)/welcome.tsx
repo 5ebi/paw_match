@@ -13,13 +13,6 @@ export default function Welcome() {
     container: {
       flex: 1,
     },
-    backgroundSvg: {
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      width: '100%',
-      height: '100%',
-    },
     contentContainer: {
       flex: 1,
       justifyContent: 'space-between',
@@ -27,6 +20,14 @@ export default function Welcome() {
     logoContainer: {
       alignItems: 'center',
       paddingTop: 40,
+    },
+    svgContainer: {
+      flex: 1,
+      width: '100%',
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginVertical: 50,
+      opacity: 0.2,
     },
     buttonsContainer: {
       marginTop: 'auto',
@@ -52,21 +53,21 @@ export default function Welcome() {
   return (
     <FullPageContainer>
       <View style={styles.container}>
-        {/* SVG-Hintergrund */}
-        <BackgroundSvg style={styles.backgroundSvg} />
-
-        {/* Hauptinhalt */}
         <View style={styles.contentContainer}>
           <View style={styles.logoContainer}>
             <Logo>Paw Match</Logo>
             <Slogan />
           </View>
 
+          <View style={styles.svgContainer}>
+            <BackgroundSvg />
+          </View>
+
           <View style={styles.buttonsContainer}>
             <Button
               style={styles.button}
               mode="contained"
-              onPress={() => router.push('/(auth)/register')}
+              onPress={() => router.push('/(auth)/registerEmail')}
             >
               Sign up BOYS!
             </Button>

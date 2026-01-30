@@ -19,18 +19,6 @@ interface VerifyResponse {
 }
 
 const ELEMENT_WIDTH = 330;
-const ELEMENT_WIDTH2 = 330;
-
-const noticeCardShadow =
-  Platform.OS === 'web'
-    ? ({ boxShadow: '0px 8px 16px rgba(0, 0, 0, 0.15)' } as const)
-    : {
-        shadowColor: colors.black,
-        shadowOffset: { width: 0, height: 8 },
-        shadowOpacity: 0.15,
-        shadowRadius: 16,
-        elevation: 5,
-      };
 
 const styles = StyleSheet.create({
   container: {
@@ -52,8 +40,8 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 20,
     color: colors.text,
-    width: ELEMENT_WIDTH2,
-    opacity: 1,
+    width: ELEMENT_WIDTH,
+    opacity: 0.8,
     fontSize: 14,
   },
   input: {
@@ -65,29 +53,6 @@ const styles = StyleSheet.create({
     marginTop: 10,
     textAlign: 'center',
     width: ELEMENT_WIDTH,
-  },
-  noticeCard: {
-    width: ELEMENT_WIDTH,
-    maxWidth: 360,
-    backgroundColor: colors.green,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: colors.yellow,
-    padding: 18,
-    marginBottom: 20,
-    ...noticeCardShadow,
-  },
-  noticeTitle: {
-    color: colors.white,
-    fontSize: 16,
-    fontWeight: '700',
-    marginBottom: 8,
-  },
-  noticeText: {
-    color: colors.white2,
-    fontSize: 14,
-    lineHeight: 20,
-    marginBottom: 14,
   },
   mailButton: {
     backgroundColor: colors.yellow,
@@ -106,14 +71,6 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     backgroundColor: colors.text,
   },
-  backTextButton: {
-    width: ELEMENT_WIDTH,
-    marginTop: 10,
-  },
-  messageText: {
-    color: colors.text,
-    marginBottom: 10,
-  },
 });
 
 const inputTheme = {
@@ -123,12 +80,15 @@ const inputTheme = {
   },
 };
 
-export default function Verify() {
+export default function RegisterVerify() {
   const [verificationCode, setVerificationCode] = useState('');
   const [status, setStatus] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const { reason } = useLocalSearchParams<{ reason?: string }>();
+  const { email, isExisting } = useLocalSearchParams<{
+    email?: string;
+    isExisting?: string;
+  }>();
 
   const handleOpenMail = useCallback(async () => {
     const mailUrl = 'mailto:';
@@ -144,14 +104,17 @@ export default function Verify() {
         setIsLoading(true);
         setStatus(null);
 
-        const response = await fetch(`/api/verify-email?code=${code}`);
+        const response = await fetch(`/api/verifyEmail?code=${code}`);
         const data: VerifyResponse = await response.json();
 
         if (response.ok) {
           await new Promise((resolve) => setTimeout(resolve, 1000));
           setStatus(data.message || 'Email verified successfully!');
           setTimeout(() => {
-            router.push('/(tabs)/addAnotherDog');
+            router.push({
+              pathname: '/registerName',
+              params: { email },
+            });
           }, 2000);
         } else {
           setStatus(data.error || 'Verification failed');
@@ -163,7 +126,7 @@ export default function Verify() {
         setIsLoading(false);
       }
     },
-    [router],
+    [router, email],
   );
 
   return (
@@ -180,14 +143,13 @@ export default function Verify() {
             </View>
 
             <Text style={styles.description}>
-              Please enter the verification code sent to your email
+              Please enter the verification code sent to {email}
             </Text>
 
-            {reason === 'existing' && (
-              <View style={styles.noticeCard}>
-                <Text style={styles.noticeTitle}>Account already created</Text>
-                <Text style={styles.noticeText}>
-                  We sent you a new verification email with a fresh code.
+            {isExisting === 'true' && (
+              <View style={{ marginBottom: 20, alignItems: 'center' }}>
+                <Text style={{ color: colors.text, marginBottom: 10 }}>
+                  A new code was sent to your email
                 </Text>
                 <Button
                   mode="contained"

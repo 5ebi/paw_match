@@ -1,7 +1,7 @@
 import { useFonts } from '@expo-google-fonts/modak';
 import {
-  Montserrat_400Regular_Italic as MontserratItalic,
-  Montserrat_600SemiBold_Italic,
+  Montserrat_400Regular as MontserratRegular,
+  Montserrat_600SemiBold as MontserratSemiBold,
 } from '@expo-google-fonts/montserrat';
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
@@ -13,24 +13,26 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: -15,
+    flexWrap: 'wrap',
+    maxWidth: 300,
   },
   baseText: {
     fontSize: 20,
     color: colors.white4,
     opacity: 1,
   },
-  italicText: {
-    fontFamily: 'Montserrat_400Regular_Italic',
+  normalText: {
+    fontFamily: 'Montserrat_400Regular',
   },
   emphasizedText: {
-    fontFamily: 'Montserrat_600SemiBold_Italic',
+    fontFamily: 'Montserrat_600SemiBold',
   },
 });
 
 export default function Slogan() {
   const [fontsLoaded] = useFonts({
-    Montserrat_400Regular_Italic: MontserratItalic,
-    Montserrat_600SemiBold_Italic,
+    Montserrat_400Regular: MontserratRegular,
+    Montserrat_600SemiBold: MontserratSemiBold,
   });
 
   if (!fontsLoaded) {
@@ -39,10 +41,10 @@ export default function Slogan() {
 
   return (
     <View style={styles.container}>
-      <Text style={[styles.baseText, styles.italicText]}>find the </Text>
+      <Text style={[styles.baseText, styles.normalText]}>find the </Text>
       <Text style={[styles.baseText, styles.emphasizedText]}>pawfect </Text>
 
-      <Text style={[styles.baseText, styles.italicText]}>match.</Text>
+      <Text style={[styles.baseText, styles.normalText]}>match</Text>
     </View>
   );
 }
