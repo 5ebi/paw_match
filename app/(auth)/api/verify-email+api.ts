@@ -16,7 +16,6 @@ export async function GET(
   try {
     const url = new URL(request.url);
     const code = url.searchParams.get('code');
-    console.log('Received verification code:', code);
 
     if (!code) {
       return ExpoApiResponse.json(
@@ -25,9 +24,7 @@ export async function GET(
       );
     }
 
-    // Trim whitespace from code
     const trimmedCode = code.trim();
-    console.log('Trimmed verification code:', trimmedCode);
 
     const { data: user, error: findError } = await supabaseAdmin
       .from('owners')
@@ -35,9 +32,6 @@ export async function GET(
       .eq('verification_code', trimmedCode)
       .eq('verified', false)
       .maybeSingle();
-
-    console.log('Found user:', user ? 'Yes' : 'No');
-    console.log('User verification code in DB:', user?.verification_code);
 
     if (findError) {
       console.error('Error finding user:', findError);
@@ -66,22 +60,18 @@ export async function GET(
       throw updateError;
     }
 
-    // Send welcome email
     try {
       await sendWelcomeEmail(user.name, user.email);
-      console.log('Welcome email sent successfully');
-    } catch (emailError) {
+    } catch (emailError: unknown) {
       console.error('Welcome email error:', emailError);
       // Don't throw - verification was successful, email is bonus
     }
-
-    console.log('User verified successfully');
 
     return ExpoApiResponse.json(
       { message: 'Email verified successfully! You can now log in.' },
       { status: 200 },
     );
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Verification error:', error);
     return ExpoApiResponse.json(
       { error: 'Verification failed' },

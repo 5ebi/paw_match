@@ -1,7 +1,7 @@
-import crypto from 'node:crypto';
 import bcryptJs from 'bcryptjs';
 import { ExpoApiResponse } from '../../../ExpoApiResponse';
 import { supabaseAdmin } from '../../../supabaseClient';
+import { hashResetToken } from '../../../util/auth';
 
 interface ResetPasswordBody {
   token: string;
@@ -11,10 +11,6 @@ interface ResetPasswordBody {
 interface ResetPasswordResponse {
   message?: string;
   error?: string;
-}
-
-function hashResetToken(token: string): string {
-  return crypto.createHash('sha256').update(token).digest('hex');
 }
 
 export async function POST(
@@ -77,7 +73,7 @@ export async function POST(
       { message: 'Password reset successfully' },
       { status: 200 },
     );
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Reset password error:', error);
     return ExpoApiResponse.json(
       { error: 'Failed to reset password' },

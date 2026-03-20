@@ -145,6 +145,7 @@ const Login: React.FC = () => {
   }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const passwordInputRef = useRef<any>(null);
   const showResetSuccess = reset === 'success';
 

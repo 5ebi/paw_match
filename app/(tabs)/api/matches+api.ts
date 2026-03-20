@@ -58,7 +58,7 @@ function calculateMatchScore(
 
 export async function GET(
   request: Request,
-): Promise<ExpoApiResponse<{ matches: any[] } | { error: string }>> {
+): Promise<ExpoApiResponse<{ matches: unknown[] } | { error: string }>> {
   try {
     const authHeader = request.headers.get('authorization');
     if (!authHeader) {

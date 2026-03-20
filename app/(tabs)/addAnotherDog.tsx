@@ -276,7 +276,7 @@ export default function AddAnotherDog() {
     [errors],
   );
 
-  const handleDateChange = (event: any, selectedDate?: Date) => {
+  const handleDateChange = (_event: unknown, selectedDate?: Date) => {
     if (selectedDate) {
       setTempDate(selectedDate);
     }
@@ -306,7 +306,6 @@ export default function AddAnotherDog() {
 
     try {
       const session = await getSession();
-      console.log('Session:', session);
       const dataToSubmit = {
         name: formData.name,
         size: formData.size,
@@ -316,7 +315,6 @@ export default function AddAnotherDog() {
         activity_level: formData.activityLevel,
         image: formData.image,
       };
-      console.log('Sending data:', dataToSubmit);
       const response = await fetch('/api/addAnotherDog', {
         method: 'POST',
         headers: {
@@ -325,9 +323,10 @@ export default function AddAnotherDog() {
         },
         body: JSON.stringify(dataToSubmit),
       });
-      const responseText = await response.text();
-      console.log('API response:', responseText);
-      if (!response.ok) throw new Error(await response.text());
+      if (!response.ok) {
+        const responseText = await response.text();
+        throw new Error(responseText);
+      }
 
       router.push('/allDone');
     } catch (err) {

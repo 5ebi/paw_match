@@ -1,6 +1,7 @@
 import bcryptJs from 'bcryptjs';
 import { ExpoApiResponse } from '../../../ExpoApiResponse';
 import { supabaseAdmin } from '../../../supabaseClient';
+import { generateSessionToken, generateVerificationCode, SESSION_EXPIRY_MS } from '../../../util/auth';
 import { sendVerificationEmail } from '../../../util/emails';
 
 interface RegisterBody {
@@ -8,12 +9,6 @@ interface RegisterBody {
   email: string;
   password: string;
   postal_code: string;
-}
-
-interface CustomError {
-  message: string;
-  name: string;
-  stack?: string;
 }
 
 interface DatabaseUser {
@@ -42,38 +37,21 @@ interface ErrorResponse {
 
 type RegisterResponse = SuccessResponse | ErrorResponse;
 
-function generateVerificationCode(): string {
-  return Math.floor(100000 + Math.random() * 900000).toString();
-}
-
-function generateSessionToken(): string {
-  return Math.random().toString(36).slice(2) + Date.now().toString(36);
-}
-
 export async function POST(
   request: Request,
 ): Promise<ExpoApiResponse<RegisterResponse>> {
-  console.log('1. API Route Start: api/register');
-
   try {
     let body: RegisterBody;
     try {
       body = await request.json();
-      console.log('2. Received request body:', {
-        name: body.name,
-        email: body.email,
-        postal_code: body.postal_code,
-      });
-      console.log('Body:', body);
       if (!body.email || !body.password || !body.name || !body.postal_code) {
-        console.error('3. Validation Error: Missing required fields');
         return ExpoApiResponse.json(
           { error: 'All fields are required' },
           { status: 400 },
         );
       }
-    } catch (parseError: any) {
-      console.error('2. JSON Parse Error:', parseError);
+    } catch (parseError: unknown) {
+      console.error('JSON Parse Error:', parseError);
       return ExpoApiResponse.json(
         { error: 'Invalid request format' },
         { status: 400 },
@@ -86,48 +64,26 @@ export async function POST(
       .eq('email', body.email.toLowerCase())
       .single();
 
-    console.log('4. Existing user check complete');
-
     if (existingUser) {
-      console.log('4a. User already exists');
-      console.log('4a-debug. Existing user data:', {
-        id: existingUser.id,
-        email: existingUser.email,
-        verified: existingUser.verified,
-        verification_code: existingUser.verification_code,
-      });
-
-      // Check if user is not verified
       if (!existingUser.verified) {
-        console.log('4b. User exists but not verified, resending verification');
-
-        // Generate new verification code
         const newVerificationCode = generateVerificationCode();
-        console.log('4b-debug. Generated new code:', newVerificationCode);
 
-        // Update verification code in database
-        const { data: updateData, error: updateError } = await supabaseAdmin
+        const { error: updateError } = await supabaseAdmin
           .from('owners')
           .update({ verification_code: newVerificationCode })
           .eq('id', existingUser.id)
           .select();
 
-        console.log('4b-debug. Update response:', { data: updateData, error: updateError });
-
         if (updateError) {
-          console.error('4c. Error updating verification code:', updateError);
           return ExpoApiResponse.json(
             { error: 'Error updating verification code' },
             { status: 500 },
           );
         }
 
-        // Resend verification email with new code
         try {
           await sendVerificationEmail(body.email, newVerificationCode);
-          console.log('4d. Verification email resent successfully');
-        } catch (emailError: any) {
-          console.error('4e. Email Error:', emailError);
+        } catch {
           // Continue even if email fails
         }
 
@@ -140,7 +96,6 @@ export async function POST(
         );
       }
 
-      // User exists and is verified - redirect to login
       return ExpoApiResponse.json(
         {
           error: 'This email is already registered. Please log in instead.',
@@ -151,14 +106,12 @@ export async function POST(
     }
 
     const verificationCode = generateVerificationCode();
-    console.log('5. Generated verification code');
 
     let passwordHash: string;
     try {
       passwordHash = await bcryptJs.hash(body.password, 10);
-      console.log('6. Password hashed successfully');
-    } catch (hashError: any) {
-      console.error('6. Password hash error:', hashError);
+    } catch (hashError: unknown) {
+      console.error('Password hash error:', hashError);
       return ExpoApiResponse.json(
         { error: 'Error processing password' },
         { status: 500 },
@@ -181,16 +134,13 @@ export async function POST(
           },
         ])
         .select()
-        .single()) as { data: DatabaseUser | null; error: any };
+        .single()) as { data: DatabaseUser | null; error: unknown };
 
       if (userError) throw userError;
       if (!newUser) throw new Error('Failed to create user');
 
-      console.log('8. User created successfully');
-
       const sessionToken = generateSessionToken();
-      const expiresAt = new Date();
-      expiresAt.setDate(expiresAt.getDate() + 7);
+      const expiresAt = new Date(Date.now() + SESSION_EXPIRY_MS);
 
       const { error: sessionError } = await supabaseAdmin.from('sessions').insert([
         {
@@ -201,18 +151,13 @@ export async function POST(
       ]);
 
       if (sessionError) throw sessionError;
-      console.log('9. Session created successfully');
 
       try {
-        console.log('10. Attempting to send verification email');
         await sendVerificationEmail(body.email, verificationCode);
-        console.log('11. Verification email sent successfully');
-      } catch (emailError: any) {
-        console.error('Email Error:', emailError);
-        console.log('11a. Continuing despite email error');
+      } catch {
+        // Continue even if email fails
       }
 
-      console.log('12. Preparing success response');
       return ExpoApiResponse.json(
         {
           user: { username: newUser.name },
@@ -222,7 +167,7 @@ export async function POST(
         },
         { status: 201 },
       );
-    } catch (dbError: any) {
+    } catch (dbError: unknown) {
       console.error('Database Error:', dbError);
       return ExpoApiResponse.json(
         { error: 'Error creating user account' },
@@ -230,21 +175,9 @@ export async function POST(
       );
     }
   } catch (error: unknown) {
-    const customError = error as CustomError;
-    const errorDetails = {
-      message: customError.message || 'Unknown error',
-      name: customError.name || 'Error',
-      stack:
-        process.env.NODE_ENV === 'development' ? customError.stack : undefined,
-    };
-    console.error('Error Details:', errorDetails);
-
+    console.error('Registration error:', error);
     return ExpoApiResponse.json(
-      {
-        error: 'Registration failed',
-        details:
-          process.env.NODE_ENV === 'development' ? errorDetails : undefined,
-      },
+      { error: 'Registration failed' },
       { status: 500 },
     );
   }

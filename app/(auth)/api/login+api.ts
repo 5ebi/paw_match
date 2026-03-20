@@ -1,7 +1,7 @@
-import crypto from 'node:crypto';
 import bcryptJs from 'bcryptjs';
 import { ExpoApiResponse } from '../../../ExpoApiResponse';
 import { supabase } from '../../../supabaseClient';
+import { generateSessionToken, SESSION_EXPIRY_MS } from '../../../util/auth';
 
 interface LoginBody {
   email: string;
@@ -36,7 +36,6 @@ export async function POST(
 ): Promise<ExpoApiResponse<LoginResponse>> {
   try {
     const body: LoginBody = await request.json();
-    console.log('1. Login attempt for email:', body.email.toLowerCase());
 
     const { data: user, error } = await supabase
       .from('owners')
@@ -45,7 +44,6 @@ export async function POST(
       .maybeSingle<Owner>();
 
     if (error) {
-      console.error('2. Supabase query error:', error);
       return ExpoApiResponse.json(
         { error: 'Database error' },
         { status: 500 },
@@ -53,17 +51,13 @@ export async function POST(
     }
 
     if (!user) {
-      console.log('3. User not found with email:', body.email.toLowerCase());
       return ExpoApiResponse.json(
         { error: 'Invalid credentials' },
         { status: 401 },
       );
     }
 
-    console.log('4. User found:', { id: user.id, email: user.email, verified: user.verified });
-
     if (!user.verified) {
-      console.log('5. User email not verified');
       return ExpoApiResponse.json(
         {
           error: 'Please verify your email address before logging in',
@@ -73,32 +67,26 @@ export async function POST(
       );
     }
 
-    console.log('6. Comparing passwords...');
     const validPassword = await bcryptJs.compare(body.password, user.password);
     if (!validPassword) {
-      console.log('7. Invalid password for user:', user.email);
       return ExpoApiResponse.json(
         { error: 'Invalid credentials' },
         { status: 401 },
       );
     }
-    console.log('8. Password valid, creating session...');
 
-    const token = crypto.randomBytes(32).toString('hex');
-    console.log('9. Generated session token');
+    const token = generateSessionToken();
 
     const { error: sessionError } = await supabase.from('sessions').insert({
       token,
       user_id: user.id,
-      expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 Tage
+      expires_at: new Date(Date.now() + SESSION_EXPIRY_MS),
     });
 
     if (sessionError) {
-      console.error('10. Session creation error:', sessionError);
       throw sessionError;
     }
 
-    console.log('11. Login successful for user:', user.email);
     return ExpoApiResponse.json(
       {
         user: {
@@ -109,7 +97,7 @@ export async function POST(
       },
       { status: 200 },
     );
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Login error:', error);
     return ExpoApiResponse.json({ error: 'Login failed' }, { status: 500 });
   }

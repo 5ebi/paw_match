@@ -1,5 +1,6 @@
 import { ExpoApiResponse } from '../../../ExpoApiResponse';
 import { supabaseAdmin } from '../../../supabaseClient';
+import { generateVerificationCode } from '../../../util/auth';
 import { sendVerificationEmail } from '../../../util/emails';
 
 interface CheckEmailBody {
@@ -12,10 +13,6 @@ interface CheckEmailResponse {
   requiresVerification?: boolean;
 }
 
-function generateVerificationCode(): string {
-  return Math.floor(100000 + Math.random() * 900000).toString();
-}
-
 export async function POST(
   request: Request,
 ): Promise<ExpoApiResponse<CheckEmailResponse>> {
@@ -23,7 +20,6 @@ export async function POST(
     let body: CheckEmailBody;
     try {
       body = await request.json();
-      console.log('Check email for:', body.email);
 
       if (!body.email) {
         return ExpoApiResponse.json(
@@ -31,7 +27,7 @@ export async function POST(
           { status: 400 },
         );
       }
-    } catch (parseError: any) {
+    } catch (parseError: unknown) {
       console.error('JSON Parse Error:', parseError);
       return ExpoApiResponse.json(
         { error: 'Invalid request format' },
@@ -46,9 +42,7 @@ export async function POST(
       .maybeSingle();
 
     if (existingUser) {
-      // User exists
       if (!existingUser.verified) {
-        // User exists but not verified - resend verification code
         const newVerificationCode = generateVerificationCode();
 
         await supabaseAdmin
@@ -58,8 +52,7 @@ export async function POST(
 
         try {
           await sendVerificationEmail(body.email, newVerificationCode);
-        } catch (emailError: any) {
-          console.error('Email Error:', emailError);
+        } catch {
           // Continue even if email fails
         }
 
@@ -72,21 +65,18 @@ export async function POST(
         );
       }
 
-      // User exists and is verified - they should log in instead
       return ExpoApiResponse.json(
         { error: 'Email already registered' },
         { status: 200 },
       );
     }
 
-    // Email is available - generate verification code and send email
     const verificationCode = generateVerificationCode();
 
     try {
       await sendVerificationEmail(body.email, verificationCode);
-    } catch (emailError: any) {
-      console.error('Email Error:', emailError);
-      // Continue anyway - they can use the code from console logs in dev
+    } catch {
+      // Continue even if email fails
     }
 
     return ExpoApiResponse.json(
@@ -97,9 +87,7 @@ export async function POST(
       { status: 200 },
     );
   } catch (error: unknown) {
-    const customError = error as { message: string };
-    console.error('Error:', customError.message);
-
+    console.error('Check email error:', error);
     return ExpoApiResponse.json(
       { error: 'Server error' },
       { status: 500 },

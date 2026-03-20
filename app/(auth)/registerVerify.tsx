@@ -104,7 +104,7 @@ export default function RegisterVerify() {
         setIsLoading(true);
         setStatus(null);
 
-        const response = await fetch(`/api/verifyEmail?code=${code}`);
+        const response = await fetch(`/api/verify-email?code=${code}`);
         const data: VerifyResponse = await response.json();
 
         if (response.ok) {

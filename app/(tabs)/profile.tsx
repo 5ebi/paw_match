@@ -5,7 +5,6 @@ import { Button, Text } from 'react-native-paper';
 import H1 from '../../components/H1';
 import H2 from '../../components/H2';
 import Textt from '../../components/Textt';
-import Textt2 from '../../components/Textt2';
 import { colors } from '../../constants/colors';
 import { sessionStorage } from '../../util/sessionStorage';
 
@@ -166,13 +165,13 @@ export default function Profile() {
                 {userName || 'Loading...'}
               </Textt>
 
-              <Textt2 style={styles.emailText}>
-                <Textt2 style={{ ...styles.boldText, color: colors.text }}>
+              <Textt variant="semibold" style={styles.emailText}>
+                <Textt variant="semibold" style={{ ...styles.boldText, color: colors.text }}>
                   Your email:{' '}
-                </Textt2>
+                </Textt>
 
-                <Textt2>{userEmail || 'Loading...'}</Textt2>
-              </Textt2>
+                <Textt variant="semibold">{userEmail || 'Loading...'}</Textt>
+              </Textt>
               <View style={styles.dogsSection}>
                 <H2>My Dogs</H2>
 

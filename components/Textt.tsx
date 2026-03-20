@@ -1,5 +1,5 @@
-// Textt.tsx
 import {
+  Montserrat_600SemiBold,
   Montserrat_700Bold,
   useFonts,
 } from '@expo-google-fonts/montserrat';
@@ -9,28 +9,35 @@ import { StyleSheet, Text } from 'react-native';
 import { colors } from '../constants/colors';
 
 const styles = StyleSheet.create({
-  Textt: {
-    fontWeight: 'bold',
+  base: {
     color: colors.white,
     marginBottom: 5,
     textAlign: 'center',
-    fontFamily: 'Montserrat_700Bold',
-    // fontSize kann hier weggelassen werden oder als Standardwert festgelegt werden
   },
 });
 
 type TexttProps = {
   children: React.ReactNode;
-  style?: TextStyle; // Optionales style Prop hinzufügen
+  style?: TextStyle;
+  variant?: 'bold' | 'semibold';
 };
 
-export default function Textt({ children, style }: TexttProps) {
+export default function Textt({ children, style, variant = 'bold' }: TexttProps) {
   const [fontsLoaded] = useFonts({
     Montserrat_700Bold,
+    Montserrat_600SemiBold,
   });
 
   if (!fontsLoaded) {
     return null;
   }
-  return <Text style={[styles.Textt, style]}>{children}</Text>;
+
+  const fontFamily = variant === 'bold' ? 'Montserrat_700Bold' : 'Montserrat_600SemiBold';
+  const fontWeight = variant === 'bold' ? 'bold' : '600';
+
+  return (
+    <Text style={[styles.base, { fontFamily, fontWeight }, style]}>
+      {children}
+    </Text>
+  );
 }

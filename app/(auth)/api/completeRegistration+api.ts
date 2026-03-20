@@ -1,6 +1,7 @@
 import bcryptJs from 'bcryptjs';
 import { ExpoApiResponse } from '../../../ExpoApiResponse';
 import { supabaseAdmin } from '../../../supabaseClient';
+import { generateSessionToken, SESSION_EXPIRY_MS } from '../../../util/auth';
 
 interface CompleteRegistrationBody {
   email: string;
@@ -28,37 +29,28 @@ interface ErrorResponse {
 
 type CompleteRegistrationResponse = SuccessResponse | ErrorResponse;
 
-function generateSessionToken(): string {
-  return Math.random().toString(36).slice(2) + Date.now().toString(36);
-}
-
 export async function POST(
   request: Request,
 ): Promise<ExpoApiResponse<CompleteRegistrationResponse>> {
-  console.log('1. Complete registration API called');
-
   try {
     let body: CompleteRegistrationBody;
     try {
       body = await request.json();
-      console.log('2. Received request body for:', body.email);
 
       if (!body.email || !body.password || !body.name || !body.postal_code) {
-        console.error('3. Validation Error: Missing required fields');
         return ExpoApiResponse.json(
           { error: 'All fields are required' },
           { status: 400 },
         );
       }
-    } catch (parseError: any) {
-      console.error('2. JSON Parse Error:', parseError);
+    } catch (parseError: unknown) {
+      console.error('JSON Parse Error:', parseError);
       return ExpoApiResponse.json(
         { error: 'Invalid request format' },
         { status: 400 },
       );
     }
 
-    // Check if user exists and is verified
     const { data: existingUser } = await supabaseAdmin
       .from('owners')
       .select()
@@ -73,13 +65,11 @@ export async function POST(
       );
     }
 
-    // Hash password
     let passwordHash: string;
     try {
       passwordHash = await bcryptJs.hash(body.password, 10);
-      console.log('6. Password hashed successfully');
-    } catch (hashError: any) {
-      console.error('6. Password hash error:', hashError);
+    } catch (hashError: unknown) {
+      console.error('Password hash error:', hashError);
       return ExpoApiResponse.json(
         { error: 'Error processing password' },
         { status: 500 },
@@ -102,17 +92,13 @@ export async function POST(
           },
         ])
         .select()
-        .single()) as { data: DatabaseUser | null; error: any };
+        .single()) as { data: DatabaseUser | null; error: unknown };
 
       if (userError) throw userError;
       if (!user) throw new Error('Failed to complete registration');
 
-      console.log('8. User registration completed');
-
-      // Create session
       const sessionToken = generateSessionToken();
-      const expiresAt = new Date();
-      expiresAt.setDate(expiresAt.getDate() + 7);
+      const expiresAt = new Date(Date.now() + SESSION_EXPIRY_MS);
 
       const { error: sessionError } = await supabaseAdmin.from('sessions').insert(
         [
@@ -125,7 +111,6 @@ export async function POST(
       );
 
       if (sessionError) throw sessionError;
-      console.log('9. Session created successfully');
 
       return ExpoApiResponse.json(
         {
@@ -134,7 +119,7 @@ export async function POST(
         },
         { status: 201 },
       );
-    } catch (dbError: any) {
+    } catch (dbError: unknown) {
       console.error('Database Error:', dbError);
       return ExpoApiResponse.json(
         { error: 'Error completing registration' },
@@ -142,9 +127,7 @@ export async function POST(
       );
     }
   } catch (error: unknown) {
-    const customError = error as { message: string };
-    console.error('Error Details:', customError.message);
-
+    console.error('Complete registration error:', error);
     return ExpoApiResponse.json(
       { error: 'Registration failed' },
       { status: 500 },

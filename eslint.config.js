@@ -4,7 +4,7 @@ import typescriptParser from '@typescript-eslint/parser';
 
 export default [
   {
-    ignores: ['node_modules', 'dist', '.expo', '.expo-shared', 'build', 'ios', 'android'],
+    ignores: ['node_modules', 'dist', '.expo', '.expo-shared', 'build', 'ios', 'android', 'scripts', '*.d.ts'],
   },
   {
     files: ['**/*.{js,jsx,ts,tsx}'],
@@ -47,11 +47,11 @@ export default [
     rules: {
       ...js.configs.recommended.rules,
       ...typescript.configs.recommended.rules,
-      'no-console': 'off',
+      'no-console': ['warn', { allow: ['warn', 'error'] }],
       'no-unused-vars': 'off',
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
       '@typescript-eslint/explicit-module-boundary-types': 'off',
-      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-explicit-any': 'warn',
     },
   },
 ];
