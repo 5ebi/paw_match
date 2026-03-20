@@ -9,6 +9,8 @@
     "ios": "expo run:ios",
     "start": "expo start",
     "test:email": "tsx scripts/test-email.ts",
+    "typecheck": "tsc",
+    "lint": "eslint . --max-warnings 0",
     "web": "expo start --web"
   },
   "dependencies": {

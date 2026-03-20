@@ -20,8 +20,8 @@
 - **Start app:** `pnpm start` or `npm run start` (runs Expo)
 - **Platform builds:** `pnpm android`, `pnpm ios`, `pnpm web`
 - **Test email sending:** `pnpm test:email` (sends test emails via Resend)
-- **Type checking:** `pnpm tsc`
-- **Linting:** `pnpm eslint . --max-warnings 0` (custom ESLint config, no PostgreSQL tools)
+- **Type checking:** `pnpm typecheck`
+- **Linting:** `pnpm lint` (custom ESLint config, no PostgreSQL tools)
 - **Backend scripts:** See `scripts/` for utilities
 
 **Note:** Database migrations are managed by Supabase directly; no local migration tool is used.
@@ -37,7 +37,7 @@
 ## Integration Points
 
 - **Supabase**: All data access (users, dogs, sessions, matches) is via Supabase client (`supabaseClient.ts`). NO local PostgreSQL.
-  - **IMPORTANT:** `supabaseClient.ts` must use environment variables (`process.env.NEXT_PUBLIC_SUPABASE_URL`, `process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY`, `process.env.SUPABASE_SERVICE_ROLE_KEY`) instead of hardcoded values.
+  - **IMPORTANT:** `supabaseClient.ts` must use environment variables (`process.env.EXPO_PUBLIC_SUPABASE_URL`, `process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY`, `process.env.SUPABASE_SERVICE_ROLE_KEY`) instead of hardcoded values.
   - Environment variables are defined in `.env.development` (dev) and `.env.production` (prod).
   - **Dev server restart required** after changing environment variables in Expo (`pnpm start` must be restarted).
   - **Common issue:** If login fails with "invalid credentials" but credentials are correct, check that Supabase URL/keys in `supabaseClient.ts` match the `.env` file (not pointing to wrong database instance).

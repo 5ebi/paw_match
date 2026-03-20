@@ -11,12 +11,12 @@ This file tracks key improvements for updating and securing the app, based on cu
   - Move admin/service keys to a secure backend or serverless function
 - [ ] **Switch session storage to SecureStore**
   - Store sensitive tokens in Expo SecureStore instead of AsyncStorage
-- [ ] **Adopt Expo environment variable system**
-  - Move secrets/config to `.env` or `app.config.ts`
+- [x] **Adopt Expo environment variable system**
+  - Renamed NEXT_PUBLIC_ prefix to EXPO_PUBLIC_ convention
 - [ ] **Extract API logic to `lib/` or `services/`**
   - Improve testability and separation of concerns
-- [ ] **Upgrade Expo SDK and dependencies**
-  - Use latest Expo, React Native, and Paper versions
+- [x] **Upgrade Expo SDK and dependencies**
+  - Upgraded to Expo SDK 55, React 19.2, RN 0.83
 - [ ] **Optimize images with `expo-image`**
   - Replace legacy image components for better caching/performance
 - [ ] **Preload fonts in splash screen**
@@ -25,8 +25,8 @@ This file tracks key improvements for updating and securing the app, based on cu
   - Use Detox/Playwright for E2E, and add unit tests for API logic
 - [ ] **Review and update DB migration tooling**
   - Ensure `ley` is maintained or migrate to Supabase/Prisma migrations
-- [ ] **Remove unused dependencies**
-  - Audit and clean up `package.json`
+- [x] **Remove unused dependencies**
+  - Removed 18 unused packages from package.json
 - [ ] **Document all scripts and workflows**
   - Ensure README is up to date and scripts are cross-platform
 - [ ] **Improve accessibility**
