@@ -1,5 +1,6 @@
 import { router } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
+import React, { useCallback, useState } from 'react';
 import { Image, ScrollView, StyleSheet, View } from 'react-native';
 import { Button, Text } from 'react-native-paper';
 import H1 from '../../components/H1';
@@ -99,34 +100,38 @@ export default function Profile() {
   const [userDogs, setUserDogs] = useState<Dog[]>([]);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const token = await sessionStorage.getSession();
-        if (!token) throw new Error('No session found');
+  useFocusEffect(
+    useCallback(() => {
+      const fetchUser = async () => {
+        try {
+          const token = await sessionStorage.getSession();
+          if (!token) throw new Error('No session found');
 
-        const response = await fetch('/api/user', {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+          const response = await fetch('/api/user', {
+            headers: { Authorization: `Bearer ${token}` },
+          });
 
-        if (!response.ok) {
-          const data = (await response.json()) as { error?: string };
-          throw new Error(data.error || 'Failed to fetch user data');
+          if (!response.ok) {
+            const data = (await response.json()) as { error?: string };
+            throw new Error(data.error || 'Failed to fetch user data');
+          }
+
+          const { name, email, dogs } = await response.json();
+          setUserName(name);
+          setUserEmail(email);
+          setUserDogs(dogs);
+        } catch (err) {
+          setError(
+            err instanceof Error
+              ? err.message
+              : 'An unexpected error occurred.',
+          );
         }
+      };
 
-        const { name, email, dogs } = await response.json();
-        setUserName(name);
-        setUserEmail(email);
-        setUserDogs(dogs);
-      } catch (err) {
-        setError(
-          err instanceof Error ? err.message : 'An unexpected error occurred.',
-        );
-      }
-    };
-
-    fetchUser().catch((err) => console.error('Fetch user failed:', err));
-  }, []);
+      fetchUser().catch((err) => console.error('Fetch user failed:', err));
+    }, []),
+  );
 
   const handleLogout = async () => {
     try {

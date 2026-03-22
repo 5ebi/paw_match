@@ -13,8 +13,9 @@ import {
 import { useFonts } from 'expo-font';
 import { router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect, useState } from 'react';
+import { useState, useCallback } from 'react';
 import { SafeAreaView, StyleSheet, View } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { Button } from 'react-native-paper';
 import BackgroundSvg from '../../components/BackgroundSvg';
 import Logo from '../../components/Logo';
@@ -42,22 +43,24 @@ const App = () => {
     Montserrat_900Black,
   });
 
-  useEffect(() => {
-    const checkDog = async () => {
-      try {
-        const token = await sessionStorage.getSession();
-        const response = await fetch('/api/hasDog', {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const data = (await response.json()) as HasDogResponse;
-        setHasDog(data.hasDog);
-      } catch (error) {
-        console.error('Error checking dog:', error);
-      }
-    };
+  useFocusEffect(
+    useCallback(() => {
+      const checkDog = async () => {
+        try {
+          const token = await sessionStorage.getSession();
+          const response = await fetch('/api/hasDog', {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          const data = (await response.json()) as HasDogResponse;
+          setHasDog(data.hasDog);
+        } catch (error) {
+          console.error('Error checking dog:', error);
+        }
+      };
 
-    checkDog().catch(console.error);
-  }, []);
+      checkDog().catch(console.error);
+    }, []),
+  );
 
   const styles = StyleSheet.create({
     container: {

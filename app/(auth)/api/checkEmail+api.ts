@@ -73,6 +73,25 @@ export async function POST(
 
     const verificationCode = generateVerificationCode();
 
+    // Create the user record so verify-email can find them by code
+    const { error: insertError } = await supabaseAdmin
+      .from('owners')
+      .insert([
+        {
+          email: body.email.toLowerCase(),
+          verification_code: verificationCode,
+          verified: false,
+        },
+      ]);
+
+    if (insertError) {
+      console.error('Error creating user:', insertError);
+      return ExpoApiResponse.json(
+        { error: 'Error creating account' },
+        { status: 500 },
+      );
+    }
+
     try {
       await sendVerificationEmail(body.email, verificationCode);
     } catch {

@@ -328,7 +328,7 @@ export default function AddAnotherDog() {
         throw new Error(responseText);
       }
 
-      router.push('/allDone');
+      router.push('/(auth)/allDone');
     } catch (err) {
       console.error('Error during submission:', err);
       setErrors((prev) => ({

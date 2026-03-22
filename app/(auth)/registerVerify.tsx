@@ -9,6 +9,7 @@ import {
   View,
 } from 'react-native';
 import { Button, Text, TextInput } from 'react-native-paper';
+import BackButton from '../../components/BackButton';
 import FullPageContainer from '../../components/FullPageContainer';
 import H1 from '../../components/H1';
 import { colors } from '../../constants/colors';
@@ -30,11 +31,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   headerContainer: {
-    flexDirection: 'row',
+    marginTop: 10,
+    marginBottom: 30,
     alignItems: 'center',
-    marginTop: 40,
-    marginBottom: 150,
-    paddingHorizontal: 20,
   },
   description: {
     textAlign: 'center',
@@ -137,6 +136,8 @@ export default function RegisterVerify() {
         keyboardVerticalOffset={20}
       >
         <View style={styles.container}>
+          <BackButton />
+
           <View style={styles.topSection}>
             <View style={styles.headerContainer}>
               <H1>Verify Your Email</H1>

@@ -69,15 +69,8 @@ export default function Welcome() {
               mode="contained"
               onPress={() => router.push('/(auth)/registerEmail')}
             >
-              Sign up BOYS!
+              Sign up
             </Button>
-            {/* <Button
-              style={styles.button2}
-              mode="contained"
-              onPress={() => router.push('/(auth)/allDone')}
-            >
-              allDONE
-            </Button> */}
             <Button
               style={styles.button2}
               mode="contained"

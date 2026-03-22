@@ -9,6 +9,7 @@ import {
   View,
 } from 'react-native';
 import { Button, HelperText, TextInput } from 'react-native-paper';
+import BackButton from '../../components/BackButton';
 import FullPageContainer from '../../components/FullPageContainer';
 import H1 from '../../components/H1';
 import { colors } from '../../constants/colors';
@@ -185,6 +186,8 @@ export default function RegisterPassword() {
         keyboardVerticalOffset={20}
       >
         <View style={styles.container}>
+          <BackButton />
+
           <View style={styles.topSection}>
             <View style={styles.headerContainer}>
               <H1>Create a password</H1>

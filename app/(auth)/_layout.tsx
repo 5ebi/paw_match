@@ -12,6 +12,8 @@ export default function AuthLayout() {
       <Stack.Screen name="registerPostalCode" />
       <Stack.Screen name="registerPassword" />
       <Stack.Screen name="verify" />
+      <Stack.Screen name="forgotPassword" />
+      <Stack.Screen name="resetPassword" />
       <Stack.Screen name="allDone" />
     </Stack>
   );

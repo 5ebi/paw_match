@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
+import { useCallback, useState } from 'react';
 import { ScrollView, StyleSheet } from 'react-native';
 import { Card, Text } from 'react-native-paper';
 import FullPageContainer from '../../components/FullPageContainer';
@@ -85,28 +86,31 @@ export default function Matches() {
   const [matches, setMatches] = useState<MatchedDog[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchMatches = async () => {
-      try {
-        const token = await sessionStorage.getSession();
-        const response = await fetch('/api/matches', {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        const data = (await response.json()) as MatchResponse;
-        setMatches(data.matches);
-      } catch (error) {
-        console.error('Error fetching matches:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  useFocusEffect(
+    useCallback(() => {
+      setLoading(true);
+      const fetchMatches = async () => {
+        try {
+          const token = await sessionStorage.getSession();
+          const response = await fetch('/api/matches', {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+          const data = (await response.json()) as MatchResponse;
+          setMatches(data.matches ?? []);
+        } catch (error) {
+          console.error('Error fetching matches:', error);
+        } finally {
+          setLoading(false);
+        }
+      };
 
-    fetchMatches().catch((error) => {
-      console.error('Failed to fetch matches:', error);
-    });
-  }, []);
+      fetchMatches().catch((error) => {
+        console.error('Failed to fetch matches:', error);
+      });
+    }, []),
+  );
 
   if (loading) {
     return (
